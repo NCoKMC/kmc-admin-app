@@ -46,7 +46,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-gray-800 mb-4">날짜 선택</h2>
             <DatePicker
               selected={selectedDate}
-              onChange={(date: Date) => setSelectedDate(date)}
+              onChange={(date: Date | null) => date && setSelectedDate(date)}
               dateFormat="yyyy/MM/dd"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
             />
@@ -55,40 +55,74 @@ export default function Dashboard() {
           {/* 오늘 오는 친구 목록 */}
           <div className="bg-white rounded-3xl p-6 shadow-lg">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">오늘 오는 친구</h2>
-            <div className="space-y-4">
-              {incomingFriends.map((friend) => (
-                <div key={friend.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <h3 className="font-medium text-gray-800">{friend.name}</h3>
-                    <p className="text-sm text-gray-500">{friend.time}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    friend.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {friend.status === 'confirmed' ? '확정' : '대기중'}
-                  </span>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">친구이름</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">오는 시간</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">방번호</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가족수</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {incomingFriends.map((friend) => (
+                    <tr key={friend.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{friend.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">서울</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.time}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">101호</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4명</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 rounded-full text-sm ${
+                          friend.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {friend.status === 'confirmed' ? '확정' : '대기중'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* 오늘 가는 친구 목록 */}
           <div className="bg-white rounded-3xl p-6 shadow-lg">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">오늘 가는 친구</h2>
-            <div className="space-y-4">
-              {outgoingFriends.map((friend) => (
-                <div key={friend.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <h3 className="font-medium text-gray-800">{friend.name}</h3>
-                    <p className="text-sm text-gray-500">{friend.time}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    friend.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {friend.status === 'confirmed' ? '확정' : '대기중'}
-                  </span>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">친구이름</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가는 시간</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">방번호</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가족수</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {outgoingFriends.map((friend) => (
+                    <tr key={friend.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{friend.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">서울</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.time}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">101호</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4명</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 rounded-full text-sm ${
+                          friend.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {friend.status === 'confirmed' ? '확정' : '대기중'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
