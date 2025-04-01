@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
+import Navigation from '../components/Navigation';
+import { useRouter } from 'next/navigation';
+import Router from 'next/router';
 
 // 임시 데이터
 const incomingFriends = [
@@ -19,25 +22,13 @@ const outgoingFriends = [
 
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const router = useRouter();
+
 
   return (
     <div className="min-h-screen bg-[#1e3a8a]">
-      {/* 상단 네비게이션 */}
-      <nav className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <button className="text-gray-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h1 className="ml-4 text-xl font-semibold text-gray-800">대시보드</h1>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <Navigation />
+      
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 gap-8">
@@ -54,7 +45,10 @@ export default function Dashboard() {
 
           {/* 오늘 오는 친구 목록 */}
           <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">오늘 오는 친구</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">오늘 오는 친구</h2>
+            
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
@@ -70,7 +64,7 @@ export default function Dashboard() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {incomingFriends.map((friend) => (
                     <tr key={friend.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{friend.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/room/${friend.id}`)}>{friend.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">서울</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.time}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">101호</td>
