@@ -1,7 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../lib/supabase';
 
 // 방 상태 타입 정의
 type RoomStatus = '사용중' | '퇴실' | '청소중' | '청소완료' | '셋팅완료' | '점검완료';
@@ -15,16 +16,6 @@ interface Room {
   guestCount: number;
 }
 
-// 임시 데이터
-const rooms: Room[] = [
-  { id: 1, roomNumber: '101', status: '사용중', guestName: '김철수', guestCount: 2 },
-  { id: 2, roomNumber: '102', status: '청소완료', guestName: '-', guestCount: 0 },
-  { id: 3, roomNumber: '103', status: '청소중', guestName: '-', guestCount: 0 },
-  { id: 4, roomNumber: '201', status: '점검완료', guestName: '-', guestCount: 0 },
-  { id: 5, roomNumber: '202', status: '사용중', guestName: '이영희', guestCount: 3 },
-  { id: 6, roomNumber: '203', status: '퇴실', guestName: '-', guestCount: 0 },
-];
-
 // 상태별 색상 매핑
 const statusColors: Record<RoomStatus, string> = {
   '사용중': 'bg-blue-100 text-blue-800',
@@ -37,10 +28,54 @@ const statusColors: Record<RoomStatus, string> = {
 
 export default function RoomList() {
   const [selectedStatus, setSelectedStatus] = useState<RoomStatus | '전체'>('전체');
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('kmc_info')
+        .select('*')
+        .order('roomNumber', { ascending: true });
+
+      if (error) {
+        console.error('데이터 가져오기 오류:', error);
+        return;
+      }
+
+      // 데이터 형식 변환
+      const formattedRooms = data.map(room => ({
+        id: room.id,
+        roomNumber: room.room_number,
+        status: room.status,
+        guestName: room.guest_name || '-',
+        guestCount: room.guest_count || 0
+      }));
+
+      setRooms(formattedRooms);
+    } catch (error) {
+      console.error('데이터 가져오기 오류:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredRooms = selectedStatus === '전체' 
     ? rooms 
     : rooms.filter(room => room.status === selectedStatus);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+        <div className="text-white text-xl">로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
