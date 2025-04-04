@@ -1,0 +1,141 @@
+'use client';
+import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from 'date-fns';
+import Navigation from '../components/Navigation';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+
+// 타입 정의
+interface Reservation {
+  kmc_cd: string;
+  user_nm: string;
+  location_nm: string;
+  check_in_ymd: string;
+  check_out_ymd: string;
+  check_in_hhmm: string;
+  check_out_hhmm: string;
+  room_no: string;
+  guest_num: number;
+  status_cd: string;
+  status_nm: string;
+  group_desc: string;
+  phone_no: string;
+  email: string;
+  memo: string;
+}
+
+export default function Reservations() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // 데이터 가져오기 함수
+  const fetchReservations = async (date: Date) => {
+    try {
+      setLoading(true);
+      const formattedDate = format(date, 'yyyyMMdd');
+
+      const { data, error } = await supabase
+        .from('kmc_info')
+        .select('*')
+        .or(`check_in_ymd.eq.${formattedDate},check_out_ymd.eq.${formattedDate}`)
+        .in('status_cd', ['S', 'I'])
+        .order('check_in_ymd', { ascending: true });
+
+      if (error) throw error;
+
+      setReservations(data || []);
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 날짜가 변경될 때마다 데이터 다시 가져오기
+  useEffect(() => {
+    fetchReservations(selectedDate);
+  }, [selectedDate]);
+
+  return (
+    <div className="min-h-screen bg-[#1e3a8a]">
+      <Navigation />
+      
+      {/* 메인 콘텐츠 */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 gap-8">
+          {/* 날짜 선택 */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">날짜 선택</h2>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date: Date | null) => date && setSelectedDate(date)}
+              dateFormat="yyyy/MM/dd"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+
+          {/* 예약 목록 */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">예약 목록</h2>
+            </div>
+            {loading ? (
+              <div className="text-center py-4">로딩 중...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">예약자</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">연락처</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크인</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크아웃</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">방번호</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">인원</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">메모</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {reservations.map((reservation, index) => (
+                      <tr key={`${reservation.kmc_cd}-${index}`} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/room/${reservation.kmc_cd}`)}>
+                          {reservation.user_nm}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.phone_no}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.location_nm}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {reservation.check_in_ymd} {reservation.check_in_hhmm}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {reservation.check_out_ymd} {reservation.check_out_hhmm}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.room_no}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.guest_num}명</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 rounded-full text-sm ${
+                            reservation.status_cd === 'C' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {reservation.status_nm}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.memo}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+} 
