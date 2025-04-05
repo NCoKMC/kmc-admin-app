@@ -112,7 +112,7 @@ export default function Dashboard() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {incomingFriends.map((friend, index) => (
                       <tr key={`${friend.kmc_cd}-${index}`}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/reservations/${friend.kmc_cd}`)}>{friend.user_nm}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/room/${friend.kmc_cd}`)}>{friend.user_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.location_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.check_in_hhmm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{friend.room_no}</td>

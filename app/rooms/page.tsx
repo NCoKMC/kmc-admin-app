@@ -5,25 +5,37 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 
 // 방 상태 타입 정의
-type RoomStatus = '사용중' | '퇴실' | '청소중' | '청소완료' | '셋팅완료' | '점검완료';
+type RoomStatus = 'I' | 'O' | 'N' | 'C' | 'T' | 'G';
+
+// 상태 코드 매핑
+const statusMap: Record<RoomStatus, string> = {
+  'I': '사용중',
+  'O': '퇴실',
+  'N': '청소중',
+  'C': '청소완료',
+  'T': '셋팅완료',
+  'G': '점검완료'
+};
 
 // 방 데이터 타입 정의
 interface Room {
-  id: number;
-  roomNumber: string;
-  status: RoomStatus;
-  guestName: string;
-  guestCount: number;
+  org: string;
+  room_no: string;
+  status_cd: string;
+  clear_chk_yn: string;
+  bipum_chk_yn: string;
+  set_chk_yn: string;
+  check_yn: string;
 }
 
 // 상태별 색상 매핑
 const statusColors: Record<RoomStatus, string> = {
-  '사용중': 'bg-blue-100 text-blue-800',
-  '퇴실': 'bg-gray-100 text-gray-800',
-  '청소중': 'bg-yellow-100 text-yellow-800',
-  '청소완료': 'bg-green-100 text-green-800',
-  '셋팅완료': 'bg-purple-100 text-purple-800',
-  '점검완료': 'bg-indigo-100 text-indigo-800',
+  'I': 'bg-blue-100 text-blue-800',
+  'O': 'bg-gray-100 text-gray-800',
+  'N': 'bg-yellow-100 text-yellow-800',
+  'C': 'bg-green-100 text-green-800',
+  'T': 'bg-purple-100 text-purple-800',
+  'G': 'bg-indigo-100 text-indigo-800'
 };
 
 export default function RoomList() {
@@ -38,25 +50,39 @@ export default function RoomList() {
 
   const fetchRooms = async () => {
     try {
+      setLoading(true);
+      console.log('데이터 가져오기 시작');
+      
       const { data, error } = await supabase
-        .from('kmc_info')
+        .from('kmc_rooms')
         .select('*')
-        .order('roomNumber', { ascending: true });
+        .order('room_no', { ascending: true });
 
       if (error) {
         console.error('데이터 가져오기 오류:', error);
         return;
       }
 
+      console.log('가져온 데이터:', data);
+      
+      if (!data || data.length === 0) {
+        console.log('데이터가 없습니다.');
+        setRooms([]);
+        return;
+      }
+
       // 데이터 형식 변환
       const formattedRooms = data.map(room => ({
-        id: room.id,
-        roomNumber: room.room_number,
-        status: room.status,
-        guestName: room.guest_name || '-',
-        guestCount: room.guest_count || 0
+        room_no: room.room_no || '',
+        org: room.org || '',
+        status_cd: room.status_cd || 'O',
+        clear_chk_yn: room.clear_chk_yn || 'N',
+        bipum_chk_yn: room.bipum_chk_yn || 'N',
+        set_chk_yn: room.set_chk_yn || 'N',
+        check_yn: room.check_yn || 'N'
       }));
 
+      console.log('변환된 데이터:', formattedRooms);
       setRooms(formattedRooms);
     } catch (error) {
       console.error('데이터 가져오기 오류:', error);
@@ -67,7 +93,7 @@ export default function RoomList() {
 
   const filteredRooms = selectedStatus === '전체' 
     ? rooms 
-    : rooms.filter(room => room.status === selectedStatus);
+    : rooms.filter(room => room.status_cd === selectedStatus);
 
   if (loading) {
     return (
@@ -109,7 +135,7 @@ export default function RoomList() {
                         : `${statusColors[status as RoomStatus]} hover:opacity-80`
                     }`}
                   >
-                    {status}
+                    {statusMap[status as RoomStatus]}
                   </button>
                 ))}
               </div>
@@ -136,24 +162,32 @@ export default function RoomList() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredRooms.map((room) => (
-                      <tr key={room.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/rooms/${room.roomNumber}`)}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {room.roomNumber}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status]}`}>
-                            {room.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {room.guestName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {room.guestCount}
+                    {filteredRooms.length > 0 ? (
+                      filteredRooms.map((room, index) => (
+                        <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/rooms/${room.room_no}`)}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {room.room_no}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
+                              {statusMap[room.status_cd as RoomStatus] || '알 수 없음'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {room.org}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            -
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                          데이터가 없습니다.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -17,10 +18,20 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    // 비밀번호 확인
+    if (password !== confirmPassword) {
+      setError('비밀번호가 일치하지 않습니다.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
       if (error) {
@@ -28,10 +39,12 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/dashboard');
+        // 회원가입 성공 메시지 표시
+        alert('회원가입이 완료되었습니다. 이메일을 확인해주세요.');
+        router.push('/login');
       }
     } catch (error: any) {
-      setError(error.message || '로그인 중 오류가 발생했습니다.');
+      setError(error.message || '회원가입 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
@@ -40,18 +53,18 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#1e3a8a] flex items-center justify-center p-4">
       <div className="w-full max-w-[400px] bg-white rounded-3xl p-8">
-        {/* 햄버거 메뉴 */}
+        {/* 뒤로가기 버튼 */}
         <div className="flex justify-start mb-8">
-          <button className="text-gray-700">
+          <Link href="/login" className="text-gray-700">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-          </button>
+          </Link>
         </div>
 
-        {/* 로그인 타이틀 */}
+        {/* 회원가입 타이틀 */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-center text-gray-800">Log in</h1>
+          <h1 className="text-2xl font-semibold text-center text-gray-800">회원가입</h1>
         </div>
         
         {/* 에러 메시지 */}
@@ -61,18 +74,18 @@ export default function LoginPage() {
           </div>
         )}
         
-        {/* 로그인 폼 */}
+        {/* 회원가입 폼 */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 이메일 입력 */}
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm text-gray-600">Email</label>
+            <label htmlFor="email" className="block text-sm text-gray-600">이메일</label>
             <div className="relative">
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="mculture.victor@gmail.com"
+                placeholder="example@email.com"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
                 required
                 disabled={loading}
@@ -82,7 +95,7 @@ export default function LoginPage() {
 
           {/* 비밀번호 입력 */}
           <div className="space-y-1">
-            <label htmlFor="password" className="block text-sm text-gray-600">Password</label>
+            <label htmlFor="password" className="block text-sm text-gray-600">비밀번호</label>
             <div className="relative">
               <input
                 id="password"
@@ -113,28 +126,37 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* 로그인 버튼 */}
+          {/* 비밀번호 확인 입력 */}
+          <div className="space-y-1">
+            <label htmlFor="confirmPassword" className="block text-sm text-gray-600">비밀번호 확인</label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
+                required
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* 회원가입 버튼 */}
           <button
             type="submit"
             className="w-full py-3 px-4 bg-[#2563eb] text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
-            {loading ? '로그인 중...' : '로그인'}
+            {loading ? '처리 중...' : '회원가입'}
           </button>
         </form>
 
-        {/* 비밀번호 찾기 */}
-        <div className="mt-4 text-center">
-          <a href="#" className="text-[#2563eb] text-sm hover:underline">
-            비밀번호를 잊으셨나요?
-          </a>
-        </div>
-
-        {/* 회원가입 링크 */}
+        {/* 로그인 링크 */}
         <div className="mt-6 text-center text-sm">
-          <span className="text-gray-600">계정이 없으신가요? </span>
-          <Link href="/signup" className="text-[#2563eb] hover:underline">
-            회원가입
+          <span className="text-gray-600">이미 계정이 있으신가요? </span>
+          <Link href="/login" className="text-[#2563eb] hover:underline">
+            로그인
           </Link>
         </div>
       </div>

@@ -5,7 +5,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
+import Router from 'next/router';
 import { supabase } from '@/lib/supabase';
+import type { JSX } from 'react';
 
 // 타입 정의
 interface Reservation {
