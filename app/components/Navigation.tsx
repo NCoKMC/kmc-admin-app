@@ -3,13 +3,23 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+type ComStatus = 'I' | 'O' | 'S';
+  // 상태 코드 매핑
+  const comStatusMap: Record<ComStatus, string> = {
+    'I': '사용중',
+    'O': '퇴실', 
+    'S': '예약'    
+  };
+
 export default function Navigation() {
   const pathname = usePathname();
 
   const navItems = [
     { name: '대시보드', path: '/dashboard' },
     { name: '예약 목록', path: '/reservations' },
-    { name: '방 목록', path: '/rooms' },
+    { name: '방 목록', path: '/room-list' },
+    { name: '식사 확인', path: '/meal-check' },
+    { name: '식사 확인 목록', path: '/meal-list' },
     { name: '로그인', path: '/login' },
   ];
 

@@ -20,8 +20,16 @@ interface Reservation {
   group_desc: string;
   phone_no: string;
   email: string;
+  seq_no: string;
   memo: string;
 }
+type RoomStatus = 'I' | 'O' | 'S';
+  // 상태 코드 매핑
+  const statusMap: Record<RoomStatus, string> = {
+    'I': '입실',
+    'O': '퇴실', 
+    'S': '예약'    
+  };
 
 export default function RoomDetail() {
   const params = useParams();
@@ -38,8 +46,8 @@ export default function RoomDetail() {
       const { data, error } = await supabase
         .from('kmc_info')
         .select('*')
-        .eq('kmc_cd', kmc_cd)
-        .in('status_cd', ['S', 'I'])
+        .eq('kmc_cd', kmc_cd)          
+        .in('status_cd', ['S', 'I','O'])
         .single();
 
       if (error) throw error;
@@ -60,12 +68,34 @@ export default function RoomDetail() {
   // 예약 상태 업데이트 함수
   const updateStatus = async (newStatus: string) => {
     try {
-      if (!reservation) return;
+      if (!reservation) {
+        alert("null"); 
+        return;
+      }
+      console.log('저장할 newStatus:', newStatus);
+      console.log('저장할 데이터:', reservation);
+
+      // 현재 로그인한 사용자의 이메일 가져오기
+      // const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      // if (userError) {
+      //   console.error('Error getting user:', userError);
+      //   alert('사용자 정보를 가져오는 중 오류가 발생했습니다.');
+      //   return;
+      // }
+      
+      // if (!user || !user.email) {
+      //   alert('로그인이 필요합니다.');
+      //   return;
+      // }
+      
 
       const { error } = await supabase
         .from('kmc_info')
         .update({ status_cd: newStatus })
-        .eq('kmc_cd', reservation.kmc_cd);
+        .eq('kmc_cd', reservation.kmc_cd)
+        .eq('seq_no', reservation.seq_no)
+        .select();
 
       if (error) throw error;
 
@@ -104,9 +134,9 @@ export default function RoomDetail() {
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-800">예약 상세 정보</h2>
                   <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    reservation.status_cd === 'C' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    reservation.status_cd === 'I' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {reservation.status_nm}
+                   {statusMap[reservation.status_cd as RoomStatus]}
                   </span>
                 </div>
 
@@ -165,30 +195,30 @@ export default function RoomDetail() {
                 {/* 메모 */}
                 <div className="mt-6 space-y-2">
                   <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">메모</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{reservation.memo || '메모 없음'}</p>
+                  <p className="text-gray-700 whitespace-pre-line">{reservation.seq_no || '메모 없음'}</p>
                 </div>
 
                 {/* 상태 변경 버튼 */}
                 <div className="mt-8 flex space-x-4">
                   <button
-                    onClick={() => updateStatus('C')}
+                    onClick={() => updateStatus('I')}
                     className={`px-4 py-2 rounded-lg ${
-                      reservation.status_cd === 'C'
+                      reservation.status_cd === 'S'
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-green-100'
                     }`}
                   >
-                    확정
+                    입실
                   </button>
                   <button
-                    onClick={() => updateStatus('P')}
+                    onClick={() => updateStatus('O')}
                     className={`px-4 py-2 rounded-lg ${
-                      reservation.status_cd === 'P'
+                      reservation.status_cd === 'I'
                         ? 'bg-yellow-500 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-yellow-100'
                     }`}
                   >
-                    대기중
+                    퇴실
                   </button>
                 </div>
               </div>

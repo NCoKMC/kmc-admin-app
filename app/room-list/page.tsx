@@ -9,8 +9,8 @@ type RoomStatus = 'I' | 'O' | 'N' | 'C' | 'T' | 'G';
 
 // 상태 코드 매핑
 const statusMap: Record<RoomStatus, string> = {
-  'I': '사용중',
-  'O': '퇴실',
+  'I': '입실',
+  'O': '퇴실', 
   'N': '청소중',
   'C': '청소완료',
   'T': '셋팅완료',
@@ -24,8 +24,8 @@ interface Room {
   status_cd: string;
   clear_chk_yn: string;
   bipum_chk_yn: string;
-  set_chk_yn: string;
   check_yn: string;
+  use_yn: string;
 }
 
 // 상태별 색상 매핑
@@ -79,7 +79,8 @@ export default function RoomList() {
         clear_chk_yn: room.clear_chk_yn || 'N',
         bipum_chk_yn: room.bipum_chk_yn || 'N',
         set_chk_yn: room.set_chk_yn || 'N',
-        check_yn: room.check_yn || 'N'
+        check_yn: room.check_yn || 'N',
+        use_yn: room.use_yn || 'N'
       }));
 
       console.log('변환된 데이터:', formattedRooms);
@@ -154,10 +155,10 @@ export default function RoomList() {
                         방상태
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        이용자명
+                        사용여부
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        입실인원
+                        점검여부
                       </th>
                     </tr>
                   </thead>
@@ -174,10 +175,10 @@ export default function RoomList() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {room.org}
+                            {room.use_yn}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            -
+                            {room.check_yn}
                           </td>
                         </tr>
                       ))

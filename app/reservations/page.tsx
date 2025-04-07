@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import Router from 'next/router';
@@ -23,7 +23,7 @@ interface Reservation {
   status_cd: string;
   status_nm: string;
   group_desc: string;
-  phone_no: string;
+  phone_num: string;
   email: string;
   memo: string;
 }
@@ -34,17 +34,29 @@ export default function Reservations() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+
+  type RoomStatus = 'I' | 'O' | 'S';
+  // 상태 코드 매핑
+  const statusMap: Record<RoomStatus, string> = {
+    'I': '입실',
+    'O': '퇴실', 
+    'S': '예약'    
+  };
+
+
   // 데이터 가져오기 함수
   const fetchReservations = async (date: Date) => {
     try {
       setLoading(true);
       const formattedDate = format(date, 'yyyyMMdd');
+    
+    
 
       const { data, error } = await supabase
         .from('kmc_info')
         .select('*')
         .or(`check_in_ymd.eq.${formattedDate},check_out_ymd.eq.${formattedDate}`)
-        .in('status_cd', ['S', 'I'])
+        .in('status_cd', ['S', 'I','O'])
         .order('check_in_ymd', { ascending: true });
 
       if (error) throw error;
@@ -92,6 +104,7 @@ export default function Reservations() {
                 <table className="min-w-full">
                   <thead>
                     <tr className="bg-gray-50">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">예약자</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">연락처</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
@@ -99,35 +112,45 @@ export default function Reservations() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크인</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크아웃</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">방번호</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">인원</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">인원</th>                      
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">메모</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {reservations.map((reservation, index) => (
-                      <tr key={`${reservation.kmc_cd}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/room/${reservation.kmc_cd}`)}>
+                      <tr key={`${reservation.kmc_cd}-${index}`} className={`hover:bg-gray-50 font-medium cursor-pointer ${
+                        isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
+                          ? 'bg-yellow-100'
+                          : 'bg-green-50'
+                      }`} onClick={() => router.push(`/room/${reservation.kmc_cd}`)}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 rounded-full text-sm ${
+                            reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            
+                            {statusMap[reservation.status_cd as RoomStatus]}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" >
                           {reservation.user_nm}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.phone_no}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {reservation.phone_num.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.email}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.location_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {reservation.check_in_ymd} {reservation.check_in_hhmm}
+                          {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_in_hhmm}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {reservation.check_out_ymd} {reservation.check_out_hhmm}
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${
+                          isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
+                            ? 'text-pink-500 font-medium' 
+                            : 'text-gray-500'
+                        }`}>
+                          {reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_out_hhmm}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.room_no}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.guest_num}명</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 rounded-full text-sm ${
-                            reservation.status_cd === 'C' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {reservation.status_nm}
-                          </span>
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.guest_num}명</td>                        
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.memo}</td>
                       </tr>
                     ))}
