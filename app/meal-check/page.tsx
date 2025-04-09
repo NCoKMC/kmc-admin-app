@@ -146,6 +146,12 @@ export default function MealCheckPage() {
       
       // 식사 인원 초기화
       setMealCount(0);
+
+      // 팝업 닫기
+      setVisitorInfo(null);
+
+      // roomNumber 초기화
+      setRoomNumber('');
     } catch (err) {
       console.error('Exception details:', err);
       if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
@@ -162,14 +168,14 @@ export default function MealCheckPage() {
     <div className="min-h-screen bg-[#1e3a8a]">
       <Navigation />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className=" mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
         <div className="bg-white rounded-3xl p-6 shadow-lg">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">식사 확인</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">식사 확인</h1>
           
           {/* 방번호 입력 영역 */}
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">방번호 입력</h2>
-            <div className="text-3xl font-bold text-center mb-4 h-12">
+            <h2 className="text-3xl font-semibold text-gray-700 mb-2">방번호를 입력하세요</h2>
+            <div className="text-8xl font-bold text-center mb-16 h-12">
               {roomNumber || '---'}
             </div>
             
@@ -179,20 +185,20 @@ export default function MealCheckPage() {
                 <button
                   key={num}
                   onClick={() => handleButtonClick(num.toString())}
-                  className="bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 rounded-xl transition-colors"
+                  className="bg-blue-500 hover:bg-blue-600 text-white text-6xl font-bold py-12 rounded-xl transition-colors"
                 >
                   {num}
                 </button>
               ))}
               <button
                 onClick={() => handleButtonClick('0')}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 rounded-xl transition-colors"
+                className="bg-blue-500 hover:bg-blue-600 text-white text-6xl font-bold py-12 rounded-xl transition-colors"
               >
                 0
               </button>
               <button
                 onClick={handleClear}
-                className="bg-red-500 hover:bg-red-600 text-white text-xl font-bold py-4 rounded-xl transition-colors"
+                className="bg-red-500 hover:bg-red-600 text-white text-6xl font-bold py-12 rounded-xl transition-colors"
               >
                 C
               </button>
@@ -202,7 +208,7 @@ export default function MealCheckPage() {
             <button
               onClick={handleCheck}
               disabled={loading || roomNumber.length !== 3}
-              className={`w-full py-3 rounded-xl text-white font-bold text-lg ${
+              className={`w-full py-12 rounded-xl text-white font-bold text-5xl ${
                 loading || roomNumber.length !== 3
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-green-500 hover:bg-green-600'
@@ -226,61 +232,78 @@ export default function MealCheckPage() {
           )}
           
           {visitorInfo && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">방문자 정보</h2>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-gray-600">방번호</p>
-                  <p className="text-2xl font-bold">{roomNumber}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">방문자</p>
-                  <p className="text-2xl font-bold">{visitorInfo.user_nm}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">인원수</p>
-                  <p className="text-2xl font-bold">{visitorInfo.guest_num}명</p>
-                </div>
-              </div>
-              
-              {/* 식사 인원 입력 영역 */}
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">식사 인원 입력</h3>
-                <div className="flex items-center justify-center space-x-4 mb-2">
-                  <button
-                    onClick={() => handleMealCountChange(-1)}
-                    className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full text-2xl font-bold flex items-center justify-center"
-                  >
-                    -
-                  </button>
-                  <div className="text-3xl font-bold w-16 text-center">{mealCount}</div>
-                  <button
-                    onClick={() => handleMealCountChange(1)}
-                    className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full text-2xl font-bold flex items-center justify-center"
-                  >
-                    +
-                  </button>
-                </div>
-                <p className="text-center text-gray-600">전체 인원: {visitorInfo.guest_num}명</p>
-                
-                {warning && (
-                  <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mt-4">
-                    {warning}
-                  </div>
-                )}
-                
-                {/* 신청 버튼 */}
-                <button
-                  onClick={handleSubmit}
-                  disabled={saving || mealCount <= 0}
-                  className={`w-full mt-4 py-3 rounded-xl text-white font-bold text-lg ${
-                    saving || mealCount <= 0
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-purple-500 hover:bg-purple-600'
-                  } transition-colors`}
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+              <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-lg max-w-[72rem] w-full relative">
+                {/* 돌아가기 버튼 */}
+                <button 
+                  onClick={() => {
+                    setVisitorInfo(null);
+                    setRoomNumber('');
+                  }} 
+                  className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-medium flex items-center transition-colors"
+                  aria-label="돌아가기"
                 >
-                  {saving ? '저장 중...' : '식사 신청'}
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  돌아가기
                 </button>
+                
+                <h2 className="text-xl font-bold text-gray-800 mb-4">방문자 정보</h2>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <p className="text-gray-600">방번호</p>
+                    <p className="text-2xl font-bold">{roomNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">방문자</p>
+                    <p className="text-2xl font-bold">{visitorInfo.user_nm}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">인원수</p>
+                    <p className="text-2xl font-bold">{visitorInfo.guest_num}명</p>
+                  </div>
+                </div>
+                
+                {/* 식사 인원 입력 영역 */}
+                <div className="mt-6 border-t pt-4">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">식사 인원 입력</h3>
+                  <div className="flex items-center justify-center space-x-4 mb-2">
+                    <button
+                      onClick={() => handleMealCountChange(-1)}
+                      className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full text-2xl font-bold flex items-center justify-center"
+                    >
+                      -
+                    </button>
+                    <div className="text-3xl font-bold w-16 text-center">{mealCount}</div>
+                    <button
+                      onClick={() => handleMealCountChange(1)}
+                      className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full text-2xl font-bold flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-center text-gray-600">전체 인원: {visitorInfo.guest_num}명</p>
+                  
+                  {warning && (
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mt-4">
+                      {warning}
+                    </div>
+                  )}
+                  
+                  {/* 신청 버튼 */}
+                  <button
+                    onClick={handleSubmit}
+                    disabled={saving || mealCount <= 0}
+                    className={`w-full mt-4 py-3 rounded-xl text-white font-bold text-lg ${
+                      saving || mealCount <= 0
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-purple-500 hover:bg-purple-600'
+                    } transition-colors`}
+                  >
+                    {saving ? '저장 중...' : '식사 신청'}
+                  </button>
+                </div>
               </div>
             </div>
           )}

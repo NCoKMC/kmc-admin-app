@@ -122,7 +122,7 @@ export default function Reservations() {
                         isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
                           ? 'bg-yellow-100'
                           : 'bg-green-50'
-                      }`} onClick={() => router.push(`/room/${reservation.kmc_cd}`)}>
+                      }`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 rounded-full text-sm ${
                             reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
