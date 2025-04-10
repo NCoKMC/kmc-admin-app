@@ -19,12 +19,12 @@ const statusMap: Record<RoomStatus, string> = {
 
 // 방 데이터 타입 정의
 interface Room {
-  org: string;
+  org_cd: string;
   room_no: string;
   status_cd: string;
   clear_chk_yn: string;
   bipum_chk_yn: string;
-  check_yn: string;
+  insp_chk_yn: string;
   use_yn: string;
 }
 
@@ -55,7 +55,7 @@ export default function RoomList() {
       
       const { data, error } = await supabase
         .from('kmc_rooms')
-        .select('*')
+        .select('room_no, org_cd, status_cd, clear_chk_yn, bipum_chk_yn, insp_chk_yn, use_yn')
         .order('room_no', { ascending: true });
 
       if (error) {
@@ -74,12 +74,11 @@ export default function RoomList() {
       // 데이터 형식 변환
       const formattedRooms = data.map(room => ({
         room_no: room.room_no || '',
-        org: room.org || '',
+        org_cd: room.org_cd || '',
         status_cd: room.status_cd || 'O',
         clear_chk_yn: room.clear_chk_yn || 'N',
-        bipum_chk_yn: room.bipum_chk_yn || 'N',
-        set_chk_yn: room.set_chk_yn || 'N',
-        check_yn: room.check_yn || 'N',
+        bipum_chk_yn: room.bipum_chk_yn || 'N',        
+        insp_chk_yn: room.insp_chk_yn || 'N',
         use_yn: room.use_yn || 'N'
       }));
 
@@ -165,7 +164,7 @@ export default function RoomList() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredRooms.length > 0 ? (
                       filteredRooms.map((room, index) => (
-                        <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/rooms/${room.room_no}`)}>
+                        <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {room.room_no}
                           </td>
@@ -178,7 +177,7 @@ export default function RoomList() {
                             {room.use_yn}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {room.check_yn}
+                            {room.insp_chk_yn}
                           </td>
                         </tr>
                       ))

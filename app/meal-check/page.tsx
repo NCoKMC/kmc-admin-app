@@ -240,7 +240,7 @@ export default function MealCheckPage() {
                     setVisitorInfo(null);
                     setRoomNumber('');
                   }} 
-                  className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-medium flex items-center transition-colors"
+                  className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white px-3 py-4 rounded-lg text-4xl font-medium flex items-center transition-colors"
                   aria-label="돌아가기"
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -249,25 +249,25 @@ export default function MealCheckPage() {
                   돌아가기
                 </button>
                 
-                <h2 className="text-xl font-bold text-gray-800 mb-4">방문자 정보</h2>
+                <h2 className="text-4xl font-bold text-gray-800 mb-6">방문자 정보</h2>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div>
-                    <p className="text-gray-600">방번호</p>
-                    <p className="text-2xl font-bold">{roomNumber}</p>
+                    <p className="text-gray-600 text-4xl mb-2">방번호</p>
+                    <p className="text-4xl font-bold">{roomNumber}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">방문자</p>
-                    <p className="text-2xl font-bold">{visitorInfo.user_nm}</p>
+                    <p className="text-gray-600 text-4xl mb-2">방문자</p>
+                    <p className="text-4xl font-bold">{visitorInfo.user_nm}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">인원수</p>
-                    <p className="text-2xl font-bold">{visitorInfo.guest_num}명</p>
+                    <p className="text-gray-600 text-4xl mb-2">인원수</p>
+                    <p className="text-4xl font-bold">{visitorInfo.guest_num}명</p>
                   </div>
                 </div>
                 
                 {/* 식사 인원 입력 영역 */}
                 <div className="mt-6 border-t pt-4">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">식사 인원 입력</h3>
+                  <h3 className="text-4xl font-semibold text-gray-700 mb-2">식사 인원 입력</h3>
                   <div className="flex items-center justify-center space-x-4 mb-2">
                     <button
                       onClick={() => handleMealCountChange(-1)}
@@ -283,7 +283,7 @@ export default function MealCheckPage() {
                       +
                     </button>
                   </div>
-                  <p className="text-center text-gray-600">전체 인원: {visitorInfo.guest_num}명</p>
+                  <p className="text-center text-gray-600 text-4xl mb-2">전체 인원: {visitorInfo.guest_num}명</p>
                   
                   {warning && (
                     <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mt-4">
@@ -295,7 +295,7 @@ export default function MealCheckPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={saving || mealCount <= 0}
-                    className={`w-full mt-4 py-3 rounded-xl text-white font-bold text-lg ${
+                    className={`w-full mt-4 py-6 rounded-xl text-white font-bold text-4xl ${
                       saving || mealCount <= 0
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-purple-500 hover:bg-purple-600'
