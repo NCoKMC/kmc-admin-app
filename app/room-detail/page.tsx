@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navigation from '../components/Navigation';
 import { supabase } from '@/lib/supabase';
@@ -19,7 +19,8 @@ interface RoomDetail {
   insp_chk_yn: string;
 }
 
-export default function RoomDetailPage() {
+// RoomDetailContent 컴포넌트로 분리
+function RoomDetailContent() {
   const searchParams = useSearchParams();
   const roomNo = searchParams.get('roomNo');
   
@@ -339,5 +340,23 @@ export default function RoomDetailPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// 로딩 상태를 표시하는 컴포넌트
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+      <div className="text-white text-2xl">로딩 중...</div>
+    </div>
+  );
+}
+
+// 메인 컴포넌트
+export default function RoomDetailPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <RoomDetailContent />
+    </Suspense>
   );
 } 
