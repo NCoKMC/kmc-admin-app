@@ -140,7 +140,7 @@ export default function RoomList() {
             {/* 방 목록 테이블 */}
             <div className="bg-white rounded-3xl p-6 shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <div className="max-h-[600px] overflow-y-auto">
+                <div className="max-h-[900px] overflow-y-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
