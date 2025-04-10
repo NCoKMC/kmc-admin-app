@@ -57,7 +57,15 @@ function RoomDetailContent() {
         } else {
           newStates.insp_chk_yn = 'N';
         }
-      } else {
+      } else if (field === 'bipum_chk_yn') {
+        // 점검완료 체크 시 청소완료와 셋팅완료도 자동 체크
+        if (prev[field] === 'N') {          
+          newStates.clear_chk_yn = 'Y';
+          newStates.bipum_chk_yn = 'Y';
+        } else {
+          newStates.bipum_chk_yn = 'N';
+        }
+      }else {
         // 다른 체크박스는 토글
         newStates[field] = prev[field] === 'Y' ? 'N' : 'Y';
       }

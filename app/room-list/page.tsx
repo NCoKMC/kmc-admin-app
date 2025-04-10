@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 
 // 방 상태 타입 정의
-type RoomStatus = 'I' | 'O' | 'N' | 'C' | 'T' | 'G';
+type RoomStatus =  'N' | 'C' | 'T' | 'G';
 
 // 상태 코드 매핑
-const statusMap: Record<RoomStatus, string> = {
-  'I': '입실',
-  'O': '퇴실', 
+const statusMap: Record<RoomStatus, string> = {  
   'N': '청소중',
   'C': '청소완료',
   'T': '셋팅완료',
@@ -30,8 +28,6 @@ interface Room {
 
 // 상태별 색상 매핑
 const statusColors: Record<RoomStatus, string> = {
-  'I': 'bg-blue-100 text-blue-800',
-  'O': 'bg-gray-100 text-gray-800',
   'N': 'bg-yellow-100 text-yellow-800',
   'C': 'bg-green-100 text-green-800',
   'T': 'bg-purple-100 text-purple-800',
@@ -144,52 +140,54 @@ export default function RoomList() {
             {/* 방 목록 테이블 */}
             <div className="bg-white rounded-3xl p-6 shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        방번호
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        방상태
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        사용여부
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        점검여부
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredRooms.length > 0 ? (
-                      filteredRooms.map((room, index) => (
-                        <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {room.room_no}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
-                              {statusMap[room.status_cd as RoomStatus] || '알 수 없음'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {room.use_yn}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {room.insp_chk_yn}
+                <div className="max-h-[600px] overflow-y-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          방번호
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          방상태
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          사용여부
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          점검여부
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredRooms.length > 0 ? (
+                        filteredRooms.map((room, index) => (
+                          <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {room.room_no}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
+                                {statusMap[room.status_cd as RoomStatus] || '알 수 없음'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {room.use_yn}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {room.insp_chk_yn}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                            데이터가 없습니다.
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
-                          데이터가 없습니다.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
