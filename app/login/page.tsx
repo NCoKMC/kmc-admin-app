@@ -44,7 +44,7 @@ export default function LoginPage() {
         console.log('다른 기기에서 로그인된 세션이 로그아웃되었습니다.');
       }
 
-      // 로그인 정보 저장 처리
+      // 로그인 정보 저장
       if (rememberMe) {
         localStorage.setItem('savedEmail', email);
       } else {
