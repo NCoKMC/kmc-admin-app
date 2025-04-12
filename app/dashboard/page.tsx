@@ -7,29 +7,32 @@ import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import Router from 'next/router';
 import { supabase } from '../lib/supabase';
+import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
 
 // 타입 정의
-interface KmcInfo {
-  kmc_cd: string;
-  user_nm: string;
-  location_nm: string;
-  check_in_ymd: string;
-  check_out_ymd: string;
-  room_no: string;
-  guest_num: number;
-  status_cd: string;
-  status_nm: string;
-  group_desc: string;
-  check_in_hhmm: string;
-  check_out_hhmm: string;
-}
-type RoomStatus = 'I' | 'O' | 'S';
-  // 상태 코드 매핑
-  const statusMap: Record<RoomStatus, string> = {
-    'I': '입실',
-    'O': '퇴실', 
-    'S': '예약'    
-  };
+//interface propPage {
+  // kmc_cd: string;
+  // user_nm: string;
+  // location_nm: string;
+  // check_in_ymd: string;
+  // check_out_ymd: string;
+  // room_no: string;
+  // guest_num: number;
+  // status_cd: string;
+  // status_nm: string;
+  // group_desc: string;
+  // check_in_hhmm: string;
+  // check_out_hhmm: string;
+
+//}
+
+// type RoomStatus = 'I' | 'O' | 'S';
+//   // 상태 코드 매핑
+//   const statusMap: Record<RoomStatus, string> = {
+//     'I': '입실',
+//     'O': '퇴실', 
+//     'S': '예약'    
+//   };
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [incomingFriends, setIncomingFriends] = useState<KmcInfo[]>([]);
@@ -85,8 +88,8 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 gap-8">
           {/* 날짜 선택 */}
-          <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">날짜 선택</h2>
+          <div className="bg-white rounded-3xl p-6 shadow-lg flex items-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-0 mr-4">날짜 선택</h2>
             <DatePicker
               selected={selectedDate}
               onChange={(date: Date | null) => date && setSelectedDate(date)}
@@ -128,7 +131,7 @@ export default function Dashboard() {
                             : friend.status_cd === 'I' ? 'bg-green-100 text-green-800' 
                               :'bg-yellow-100 text-yellow-800'
                           }`}>                            
-                            {statusMap[friend.status_cd as RoomStatus]}
+                            {reservationStatusMap[friend.status_cd as ReservationStatus]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.room_no}</td>
@@ -171,7 +174,7 @@ export default function Dashboard() {
                             : friend.status_cd === 'O' ? 'bg-green-100 text-green-800' 
                               :'bg-yellow-100 text-yellow-800'
                           }`}>
-                            {statusMap[friend.status_cd as RoomStatus]}
+                            {reservationStatusMap[friend.status_cd as ReservationStatus]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.room_no}</td>

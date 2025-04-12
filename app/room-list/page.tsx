@@ -4,36 +4,37 @@ import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { RoomStatus, roomStatusMap, Room, roomStatusColors } from '../lib/type';
 
 // 방 상태 타입 정의
-type RoomStatus =  'N' | 'C' | 'T' | 'G';
+// type RoomStatus =  'N' | 'C' | 'T' | 'G';
 
 // 상태 코드 매핑
-const statusMap: Record<RoomStatus, string> = {  
-  'N': '청소중',
-  'C': '청소완료',
-  'T': '셋팅완료',
-  'G': '점검완료'
-};
+// const statusMap: Record<RoomStatus, string> = {  
+//   'N': '청소중',
+//   'C': '청소완료',
+//   'T': '셋팅완료',
+//   'G': '점검완료'
+// };
 
 // 방 데이터 타입 정의
-interface Room {
-  org_cd: string;
-  room_no: string;
-  status_cd: string;
-  clear_chk_yn: string;
-  bipum_chk_yn: string;
-  insp_chk_yn: string;
-  use_yn: string;
-}
+// interface Room {
+//   org_cd: string;
+//   room_no: string;
+//   status_cd: string;
+//   clear_chk_yn: string;
+//   bipum_chk_yn: string;
+//   insp_chk_yn: string;
+//   use_yn: string;
+// }
 
-// 상태별 색상 매핑
-const statusColors: Record<RoomStatus, string> = {
-  'N': 'bg-yellow-100 text-yellow-800',
-  'C': 'bg-green-100 text-green-800',
-  'T': 'bg-purple-100 text-purple-800',
-  'G': 'bg-indigo-100 text-indigo-800'
-};
+// // 상태별 색상 매핑
+// const statusColors: Record<RoomStatus, string> = {
+//   'N': 'bg-yellow-100 text-yellow-800',
+//   'C': 'bg-green-100 text-green-800',
+//   'T': 'bg-purple-100 text-purple-800',
+//   'G': 'bg-indigo-100 text-indigo-800'
+// };
 
 export default function RoomList() {
   const [selectedStatus, setSelectedStatus] = useState<RoomStatus | '전체'>('전체');
@@ -69,7 +70,6 @@ export default function RoomList() {
         return;
       }
 
-      console.log('가져온 데이터:', data);
       
       if (!data || data.length === 0) {
         console.log('데이터가 없습니다.');
@@ -88,7 +88,6 @@ export default function RoomList() {
         use_yn: room.use_yn || 'N'
       }));
 
-      console.log('변환된 데이터:', formattedRooms);
       setRooms(formattedRooms);
     } catch (error) {
       console.error('데이터 가져오기 오류:', error);
@@ -143,17 +142,17 @@ export default function RoomList() {
                 >
                   전체
                 </button>
-                {Object.keys(statusColors).map((status) => (
+                {Object.keys(roomStatusColors).map((status) => (
                   <button
                     key={status}
                     onClick={() => setSelectedStatus(status as RoomStatus)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium ${
                       selectedStatus === status 
                         ? 'bg-blue-500 text-white' 
-                        : `${statusColors[status as RoomStatus]} hover:opacity-80`
+                        : `${roomStatusColors[status as RoomStatus]} hover:opacity-80`
                     }`}
                   >
-                    {statusMap[status as RoomStatus]}
+                    {roomStatusMap[status as RoomStatus]}
                   </button>
                 ))}
               </div>
@@ -188,8 +187,8 @@ export default function RoomList() {
                               {room.room_no}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap truncate">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
-                                {statusMap[room.status_cd as RoomStatus] || '알 수 없음'}
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roomStatusMap[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
+                                {roomStatusMap[room.status_cd as RoomStatus] || '알 수 없음'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">

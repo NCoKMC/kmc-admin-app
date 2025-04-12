@@ -3,38 +3,38 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation';
 import { supabase } from '../../lib/supabase';
-
+import { KmcInfo, ReservationStatus, reservationStatusMap } from '../../lib/type';
 // 타입 정의
-interface Reservation {
-  kmc_cd: string;
-  user_nm: string;
-  location_nm: string;
-  check_in_ymd: string;
-  check_out_ymd: string;
-  check_in_hhmm: string;
-  check_out_hhmm: string;
-  room_no: string;
-  guest_num: number;
-  status_cd: string;
-  status_nm: string;
-  group_desc: string;
-  phone_num: string;
-  user_email: string;
-  seq_no: string;
-  memo: string;
-}
-type RoomStatus = 'I' | 'O' | 'S';
+//interface Reservation {
+  // kmc_cd: string;
+  // user_nm: string;
+  // location_nm: string;
+  // check_in_ymd: string;
+  // check_out_ymd: string;
+  // check_in_hhmm: string;
+  // check_out_hhmm: string;
+  // room_no: string;
+  // guest_num: number;
+  // status_cd: string;
+  // status_nm: string;
+  // group_desc: string;
+  // phone_num: string;
+  // user_email: string;
+  // seq_no: string;
+  // memo: string;
+//}
+//type RoomStatus = 'I' | 'O' | 'S';
   // 상태 코드 매핑
-  const statusMap: Record<RoomStatus, string> = {
-    'I': '입실',
-    'O': '퇴실', 
-    'S': '예약'    
-  };
+  //const statusMap: Record<RoomStatus, string> = {
+  //  'I': '입실',
+  //  'O': '퇴실', 
+  //  'S': '예약'    
+  //};
 
 export default function RoomDetail() {
   const params = useParams();
   const router = useRouter();
-  const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [reservation, setReservation] = useState<KmcInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 데이터 가져오기 함수
@@ -136,7 +136,7 @@ export default function RoomDetail() {
                   <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                     reservation.status_cd === 'I' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                   {statusMap[reservation.status_cd as RoomStatus]}
+                   {reservationStatusMap[reservation.status_cd as ReservationStatus]}
                   </span>
                 </div>
 

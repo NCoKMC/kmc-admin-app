@@ -4,13 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 
-type ComStatus = 'I' | 'O' | 'S';
-  // 상태 코드 매핑
-  const comStatusMap: Record<ComStatus, string> = {
-    'I': '사용중',
-    'O': '퇴실', 
-    'S': '예약'    
-  };
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -39,7 +32,7 @@ export default function Navigation() {
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  className={`px-3 py-2 rounded-md text-lg font-bold ${
                     pathname === item.path
                       ? 'bg-blue-500 text-white'
                       : 'text-gray-700 hover:bg-gray-100'

@@ -8,40 +8,41 @@ import { useRouter } from 'next/navigation';
 import Router from 'next/router';
 import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
+import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
 
 // 타입 정의
-interface Reservation {
-  kmc_cd: string;
-  user_nm: string;
-  location_nm: string;
-  check_in_ymd: string;
-  check_out_ymd: string;
-  check_in_hhmm: string;
-  check_out_hhmm: string;
-  room_no: string;
-  guest_num: number;
-  status_cd: string;
-  status_nm: string;
-  group_desc: string;
-  phone_num: string;
-  email: string;
-  memo: string;
-}
+//interface Reservation {
+  // kmc_cd: string;
+  // user_nm: string;
+  // location_nm: string;
+  // check_in_ymd: string;
+  // check_out_ymd: string;
+  // check_in_hhmm: string;
+    // check_out_hhmm: string;
+    // room_no: string;
+    // guest_num: number;
+    // status_cd: string;
+  // status_nm: string;
+  // group_desc: string;
+  // phone_num: string;
+  // email: string;
+  // memo: string;
+//}
 
 export default function Reservations() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservations, setReservations] = useState<KmcInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
 
-  type RoomStatus = 'I' | 'O' | 'S';
-  // 상태 코드 매핑
-  const statusMap: Record<RoomStatus, string> = {
-    'I': '입실',
-    'O': '퇴실', 
-    'S': '예약'    
-  };
+  // type RoomStatus = 'I' | 'O' | 'S';
+  // // 상태 코드 매핑
+  // const statusMap: Record<RoomStatus, string> = {
+  //   'I': '입실',
+  //   'O': '퇴실', 
+  //   'S': '예약'    
+  // };
 
 
   // 데이터 가져오기 함수
@@ -124,7 +125,7 @@ export default function Reservations() {
                             reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                           }`}>
                             
-                            {statusMap[reservation.status_cd as RoomStatus]}
+                            {reservationStatusMap[reservation.status_cd as ReservationStatus]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" >
