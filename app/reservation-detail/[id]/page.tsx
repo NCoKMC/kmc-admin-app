@@ -18,8 +18,8 @@ interface Reservation {
   status_cd: string;
   status_nm: string;
   group_desc: string;
-  phone_no: string;
-  email: string;
+  phone_num: string;
+  user_email: string;
   seq_no: string;
   memo: string;
 }
@@ -150,11 +150,14 @@ export default function RoomDetail() {
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-gray-500">연락처</div>
-                      <div className="col-span-2 font-medium">{reservation.phone_no}</div>
+                      <div className="col-span-2 font-medium">                        
+                        {reservation.phone_num.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}
+                        </div>
+                      
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-gray-500">이메일</div>
-                      <div className="col-span-2 font-medium">{reservation.email}</div>
+                      <div className="col-span-2 font-medium">{reservation.user_email}</div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-gray-500">지역</div>
@@ -172,13 +175,13 @@ export default function RoomDetail() {
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-gray-500">체크인</div>
                       <div className="col-span-2 font-medium">
-                        {reservation.check_in_ymd} {reservation.check_in_hhmm}
+                        {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_in_hhmm}
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-gray-500">체크아웃</div>
                       <div className="col-span-2 font-medium">
-                        {reservation.check_out_ymd} {reservation.check_out_hhmm}
+                        {reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_out_hhmm}
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
