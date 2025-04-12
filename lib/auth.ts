@@ -16,6 +16,40 @@ export async function checkAuth() {
   return session;
 }
 
+// 중복 로그인 체크 및 다른 세션 로그아웃 함수
+export async function checkDuplicateLogin(email: string) {
+  try {
+    // 현재 세션 가져오기
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    
+    if (!currentSession) {
+      return false;
+    }
+
+    // 현재 사용자의 모든 세션 가져오기
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return false;
+    }
+
+    // 현재 세션을 제외한 다른 세션 로그아웃
+    const { error } = await supabase.auth.signOut({
+      scope: 'others'
+    });
+    
+    if (error) {
+      console.error('다른 세션 로그아웃 중 오류 발생:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('중복 로그인 체크 중 오류 발생:', error);
+    return false;
+  }
+}
+
 // 클라이언트 컴포넌트에서 사용할 수 있는 인증 확인 훅
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { checkDuplicateLogin } from '@/lib/auth';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,7 +11,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+
+  // 저장된 로그인 정보 불러오기
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('savedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +36,19 @@ export default function LoginPage() {
 
       if (error) {
         throw error;
+      }
+
+      // 중복 로그인 체크 및 다른 세션 로그아웃
+      const hasOtherSessions = await checkDuplicateLogin(email);
+      if (hasOtherSessions) {
+        console.log('다른 기기에서 로그인된 세션이 로그아웃되었습니다.');
+      }
+
+      // 로그인 정보 저장 처리
+      if (rememberMe) {
+        localStorage.setItem('savedEmail', email);
+      } else {
+        localStorage.removeItem('savedEmail');
       }
 
       if (data.user) {
@@ -111,6 +135,22 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+          </div>
+
+          {/* 로그인 정보 저장 체크박스 */}
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={loading}
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">
+              로그인 정보 저장
+            </label>
           </div>
 
           {/* 로그인 버튼 */}
