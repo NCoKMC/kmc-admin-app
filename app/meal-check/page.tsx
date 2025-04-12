@@ -1,7 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 
 interface VisitorInfo {
   user_nm: string;
@@ -18,6 +19,14 @@ export default function MealCheckPage() {
   const [error, setError] = useState('');
   const [warning, setWarning] = useState('');
   const [success, setSuccess] = useState('');
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      // 인증되지 않은 경우 로그인 페이지로 리디렉션
+      window.location.href = '/login';
+    }
+  }, [isAuthenticated, authLoading]);
 
   const handleButtonClick = (num: string) => {
     if (roomNumber.length < 3) {
@@ -163,6 +172,18 @@ export default function MealCheckPage() {
       setSaving(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+        <div className="text-white text-xl">인증 확인 중...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // 리디렉션 중이므로 아무것도 렌더링하지 않음
+  }
 
   return (
     <div className="min-h-screen bg-[#1e3a8a]">

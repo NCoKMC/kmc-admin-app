@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
 
 type ComStatus = 'I' | 'O' | 'S';
   // 상태 코드 매핑
@@ -13,6 +14,7 @@ type ComStatus = 'I' | 'O' | 'S';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     { name: '대시보드', path: '/dashboard' },
@@ -20,11 +22,10 @@ export default function Navigation() {
     { name: '방 목록', path: '/room-list' },
     { name: '식사 확인', path: '/meal-check' },
     { name: '식사 확인 목록', path: '/meal-list' },
-    { name: '로그인', path: '/login' },
   ];
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-white shadow-lg mt-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -48,6 +49,27 @@ export default function Navigation() {
                 </Link>
               ))}
             </div>
+          </div>
+          <div className="flex items-center">
+            {isAuthenticated ? (
+              <Link
+                href="/logout"
+                className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50"
+              >
+                로그아웃
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  pathname === '/login'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                로그인
+              </Link>
+            )}
           </div>
         </div>
       </div>

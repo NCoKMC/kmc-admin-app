@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navigation from '../components/Navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 
 interface RoomDetail {
   room_no: string;
@@ -33,15 +34,19 @@ function RoomDetailContent() {
     clear_chk_yn: 'N',
     insp_chk_yn: 'N'
   });
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (roomNo) {
-      fetchRoomDetail(roomNo);
-    } else {
-      setError('방 번호가 제공되지 않았습니다.');
-      setLoading(false);
+    if (!authLoading && !isAuthenticated) {
+      // 인증되지 않은 경우 로그인 페이지로 리디렉션
+      window.location.href = '/login';
+      return;
     }
-  }, [roomNo]);
+    
+    if (isAuthenticated && roomNo) {
+      fetchRoomDetail(roomNo);
+    }
+  }, [roomNo, isAuthenticated, authLoading]);
 
   // 체크박스 상태 변경 핸들러
   const handleCheckboxChange = (field: 'bipum_chk_yn' | 'clear_chk_yn' | 'insp_chk_yn') => {
@@ -225,6 +230,26 @@ function RoomDetailContent() {
     return statusMap[statusCd] || statusCd;
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+        <div className="text-white text-xl">인증 확인 중...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // 리디렉션 중이므로 아무것도 렌더링하지 않음
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+        <div className="text-white text-xl">로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#1e3a8a]">
       <Navigation />
@@ -235,11 +260,7 @@ function RoomDetailContent() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">방 상세 정보</h1>            
           </div>
           
-          {loading ? (
-            <div className="flex justify-center items-center h-48 sm:h-64">
-              <div className="text-xl sm:text-2xl text-gray-600">로딩 중...</div>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg mb-4 text-sm sm:text-base">
               {error}
             </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '@/lib/auth';
 
 // 방 상태 타입 정의
 type RoomStatus =  'N' | 'C' | 'T' | 'G';
@@ -39,10 +40,19 @@ export default function RoomList() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    fetchRooms();
-  }, []);
+    if (!authLoading && !isAuthenticated) {
+      // 인증되지 않은 경우 로그인 페이지로 리디렉션
+      router.push('/login');
+      return;
+    }
+    
+    if (isAuthenticated) {
+      fetchRooms();
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   const fetchRooms = async () => {
     try {
@@ -90,6 +100,18 @@ export default function RoomList() {
   const filteredRooms = selectedStatus === '전체' 
     ? rooms 
     : rooms.filter(room => room.status_cd === selectedStatus);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
+        <div className="text-white text-xl">인증 확인 중...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // 리디렉션 중이므로 아무것도 렌더링하지 않음
+  }
 
   if (loading) {
     return (
@@ -141,19 +163,19 @@ export default function RoomList() {
             <div className="bg-white rounded-3xl p-6 shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <div className="max-h-[900px] overflow-y-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200 table-fixed">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                           방번호
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                           방상태
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                           사용여부
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                           점검여부
                         </th>
                       </tr>
@@ -162,18 +184,18 @@ export default function RoomList() {
                       {filteredRooms.length > 0 ? (
                         filteredRooms.map((room, index) => (
                           <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate">
                               {room.room_no}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 py-4 whitespace-nowrap truncate">
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
                                 {statusMap[room.status_cd as RoomStatus] || '알 수 없음'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
                               {room.use_yn}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
                               {room.insp_chk_yn}
                             </td>
                           </tr>
