@@ -50,7 +50,7 @@ export async function checkDuplicateLogin(email: string) {
   }
 }
 
-// 클라이언트 컴포넌트에서 사용할 수 있는 인증 확인 훅
+// 클라이언트 컴포넌트에서 사용할 수 있는 인증 확인 훅 ....
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
