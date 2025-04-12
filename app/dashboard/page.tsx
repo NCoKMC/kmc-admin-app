@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import Router from 'next/router';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 // 타입 정의
 interface KmcInfo {

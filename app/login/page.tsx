@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 import Link from 'next/link';
-import { checkDuplicateLogin } from '@/lib/auth';
+import { checkDuplicateLogin } from '../lib/auth';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);

@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/lib/auth';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/auth';
 
 interface VisitorInfo {
   user_nm: string;

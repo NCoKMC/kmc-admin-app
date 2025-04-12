@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '../lib/auth';
 
 type ComStatus = 'I' | 'O' | 'S';
   // 상태 코드 매핑

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 // 타입 정의
 interface Reservation {
