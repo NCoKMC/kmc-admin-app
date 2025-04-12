@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '../lib/auth';
 
 // 방 상태 타입 정의
 type RoomStatus =  'N' | 'C' | 'T' | 'G';
