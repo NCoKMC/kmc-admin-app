@@ -63,6 +63,7 @@ export default function RoomList() {
       const { data, error } = await supabase
         .from('kmc_rooms')
         .select('room_no, org_cd, status_cd, clear_chk_yn, bipum_chk_yn, insp_chk_yn, use_yn')
+        .eq('use_yn', 'Y')
         .order('room_no', { ascending: true });
 
       if (error) {
