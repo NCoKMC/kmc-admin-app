@@ -76,6 +76,7 @@ export default function MealCheckPage() {
         .from('kmc_info')
         .select('user_nm, guest_num, kmc_cd')
         .gte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .lte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
         .like('room_no', `%${roomNumber}%`)
         .in('status_cd', ['I','S'])
         .single();

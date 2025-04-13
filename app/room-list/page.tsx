@@ -70,7 +70,23 @@ export default function RoomList() {
         return;
       }
 
+      // 예약 정보 가져오기
+      const today = new Date().toISOString().split('T')[0];
+      const { data: reservations, error: reservationError } = await supabase
+        .from('kmc_info')
+        .select('room_no, check_in_ymd, check_out_ymd')
+        .lte('check_in_ymd', today)
+        .gte('check_out_ymd', today)
+        .in('status_cd', ['I', 'S'])
+        .order('room_no', { ascending: true });
+
+      if (reservationError) {
+        console.error('예약 정보 가져오기 오류:', reservationError);
+        return;
+      }
       
+      //console.log('예약 정보:', reservations);
+
       if (!data || data.length === 0) {
         console.log('데이터가 없습니다.');
         setRooms([]);
@@ -78,15 +94,19 @@ export default function RoomList() {
       }
 
       // 데이터 형식 변환
-      const formattedRooms = data.map(room => ({
-        room_no: room.room_no || '',
-        org_cd: room.org_cd || '',
-        status_cd: room.status_cd || 'O',
-        clear_chk_yn: room.clear_chk_yn || 'N',
-        bipum_chk_yn: room.bipum_chk_yn || 'N',        
-        insp_chk_yn: room.insp_chk_yn || 'N',
-        use_yn: room.use_yn || 'N'
-      }));
+      const formattedRooms = data.map(room => {
+        const isOccupied = reservations?.some(reservation => reservation.room_no?.includes(room.room_no));
+        //console.log('isOccupied:', isOccupied);
+        return {
+          room_no: room.room_no || '',
+          org_cd: room.org_cd || '',
+          status_cd: room.status_cd || 'O',
+          clear_chk_yn: room.clear_chk_yn || 'N',
+          bipum_chk_yn: room.bipum_chk_yn || 'N',        
+          insp_chk_yn: room.insp_chk_yn || 'N',
+          use_yn: isOccupied ? 'Y' : 'N'
+        };
+      });
 
       setRooms(formattedRooms);
     } catch (error) {
@@ -172,7 +192,7 @@ export default function RoomList() {
                           방상태
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                          사용여부
+                          입실/퇴실
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                           점검여부
@@ -187,12 +207,12 @@ export default function RoomList() {
                               {room.room_no}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap truncate">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roomStatusMap[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roomStatusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
                                 {roomStatusMap[room.status_cd as RoomStatus] || '알 수 없음'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
-                              {room.use_yn}
+                              {room.use_yn === 'Y' ? '입실' : '공실'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
                               {room.insp_chk_yn}

@@ -180,6 +180,7 @@ function RoomDetailContent() {
         .like('room_no', '%' + roomNo + '%')
         .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
         .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .in('status_cd', ['I', 'S'])
         .single();
       
         console.log(new Date().toISOString().split('T')[0].replace(/-/g, ''));

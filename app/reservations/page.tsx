@@ -30,35 +30,44 @@ import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
 //}
 
 export default function Reservations() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [selectedStatus, setSelectedStatus] = useState<string>('전체');
   const [reservations, setReservations] = useState<KmcInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-
-  // type RoomStatus = 'I' | 'O' | 'S';
-  // // 상태 코드 매핑
-  // const statusMap: Record<RoomStatus, string> = {
-  //   'I': '입실',
-  //   'O': '퇴실', 
-  //   'S': '예약'    
-  // };
-
+  // 예약 상태 옵션
+  const reservationStatusOptions = [
+    { value: '전체', label: '전체' },
+    { value: 'I', label: '입실' },
+    { value: 'S', label: '예약' },
+    { value: 'O', label: '퇴실' }
+  ];
 
   // 데이터 가져오기 함수
-  const fetchReservations = async (date: Date) => {
+  const fetchReservations = async () => {
     try {
       setLoading(true);
-      const formattedDate = format(date, 'yyyyMMdd');
-    
-    
+      const [year, month] = selectedYearMonth.split('-');
+      const formattedDate = `${selectedYearMonth.replace(/-/g, '')}%`;
+      const endDate = `${selectedYearMonth}-31`;
 
-      const { data, error } = await supabase
+      
+    
+      let query = supabase
         .from('kmc_info')
-        .select('*')
-        .or(`check_in_ymd.eq.${formattedDate},check_out_ymd.eq.${formattedDate}`)
-        .in('status_cd', ['S', 'I','O'])
+        .select('*')        
+        .or(`check_in_ymd.like.${formattedDate},check_out_ymd.like.${formattedDate}`)
+        .in('status_cd', ['S', 'I', 'O'])
         .order('check_in_ymd', { ascending: true });
+
+      
+
+      if (selectedStatus !== '전체') {
+        query = query.eq('status_cd', selectedStatus);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -70,10 +79,10 @@ export default function Reservations() {
     }
   };
 
-  // 날짜가 변경될 때마다 데이터 다시 가져오기
+  // 검색 조건이 변경될 때마다 데이터 다시 가져오기
   useEffect(() => {
-    fetchReservations(selectedDate);
-  }, [selectedDate]);
+    fetchReservations();
+  }, [selectedYearMonth, selectedStatus]);
 
   return (
     <div className="min-h-screen bg-[#1e3a8a]">
@@ -82,15 +91,49 @@ export default function Reservations() {
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 gap-8">
-          {/* 날짜 선택 */}
+          {/* 검색 조건 */}
           <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">날짜 선택</h2>
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date: Date | null) => date && setSelectedDate(date)}
-              dateFormat="yyyy/MM/dd"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
-            />
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">검색 조건</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 년월 선택 */}
+              <div>
+                <label htmlFor="yearMonth" className="block text-sm font-medium text-gray-700 mb-1">
+                  년월
+                </label>
+                <input
+                  type="month"
+                  id="yearMonth"
+                  value={selectedYearMonth}
+                  onChange={(e) => setSelectedYearMonth(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* 예약 상태 선택 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  예약 상태
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {reservationStatusOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedStatus(option.value)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium ${
+                        selectedStatus === option.value 
+                          ? option.value === '전체' ? 'bg-blue-500 text-white' :
+                            option.value === 'S' ? 'bg-green-100 text-green-800' :
+                            option.value === 'I' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 예약 목록 */}
@@ -107,7 +150,6 @@ export default function Reservations() {
                     <tr className="bg-gray-50">
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">예약자</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">연락처</th>                      
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크인</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크아웃</th>                                                           
@@ -122,18 +164,16 @@ export default function Reservations() {
                       }`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 rounded-full text-sm ${
-                            reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 
+                            reservation.status_cd === 'I' ? 'bg-blue-100 text-blue-800' : 
+                            'bg-yellow-100 text-yellow-800'
                           }`}>
-                            
                             {reservationStatusMap[reservation.status_cd as ReservationStatus]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" >
                           {reservation.user_nm}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {reservation.phone_num.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}
-                        </td>                       
+                        </td>                                              
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.location_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_in_hhmm}
