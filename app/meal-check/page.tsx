@@ -13,12 +13,12 @@ interface VisitorInfo {
 export default function MealCheckPage() {
   const [roomNumber, setRoomNumber] = useState('');
   const [visitorInfo, setVisitorInfo] = useState<VisitorInfo | null>(null);
-  const [mealCount, setMealCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [warning, setWarning] = useState('');
   const [success, setSuccess] = useState('');
+  const [mealCount, setMealCount] = useState(0);
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -51,6 +51,13 @@ export default function MealCheckPage() {
       return;
     }
     
+    // 최대 인원을 4명으로 제한
+    if (newCount > 4) {
+      setMealCount(4);
+      setWarning('최대 인원은 4명으로 제한됩니다.');
+      return;
+    }
+    
     if (visitorInfo && newCount > visitorInfo.guest_num) {
       setWarning(`경고: 전체 인원수(${visitorInfo.guest_num}명)보다 많은 식사 인원을 입력했습니다.`);
     } else {
@@ -78,8 +85,8 @@ export default function MealCheckPage() {
       const { data, error } = await supabase
         .from('kmc_info')
         .select('user_nm, guest_num, kmc_cd')
-        .gte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
-        .lte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
         .like('room_no', `%${roomNumber}%`)
         .in('status_cd', ['I','S'])
         .single();
@@ -95,7 +102,13 @@ export default function MealCheckPage() {
         return;
       }
 
-      setVisitorInfo(data);
+      // guest_num을 항상 4로 설정
+      const modifiedData = {
+        ...data,
+        guest_num: 4
+      };
+      
+      setVisitorInfo(modifiedData);
       setMealCount(0); // 방문자 정보가 로드되면 식사 인원 초기화
     } catch (err) {
       setError('오류가 발생했습니다.');
@@ -125,14 +138,30 @@ export default function MealCheckPage() {
       // 현재 날짜와 시간 가져오기
       const now = new Date();
       const today = now.toISOString().split('T')[0].replace(/-/g, '');
-      const currentTime = now.toTimeString().split(' ')[0].replace(/:/g, '').substring(0, 4);
+      const currentDate = now.toISOString();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTime = `${String(currentHour).padStart(2, '0')}${String(currentMinute).padStart(2, '0')}`;
+      
+      // 시간에 따라 meal_cd 결정
+      let mealCd = 'T'; // 기본값
+      if (currentHour >= 4 && currentHour < 10) {
+        mealCd = 'M'; // 아침 식사 (4시~10시)
+      } else if (currentHour >= 10 && currentHour < 15) {
+        mealCd = 'A'; // 점심 식사 (10시~15시)
+      } else if (currentHour >= 15 && currentHour < 21) {
+        mealCd = 'E'; // 저녁 식사 (15시~21시)
+      } else {
+        mealCd = 'T'; // 기타 시간
+      }
 
       // 저장할 데이터 준비
       const mealData = {
         room_no: roomNumber,
         org: 'K',
-        meal_date: today,
-        meal_cd: 'M',
+        meal_ymd: today,
+        meal_time: currentTime,
+        meal_cd: mealCd,
         eat_num: mealCount
       };
 
@@ -155,23 +184,19 @@ export default function MealCheckPage() {
       }
 
       console.log('저장된 데이터:', data);
-      setSuccess(`식사 인원 ${mealCount}명이 성공적으로 등록되었습니다.`);
+      setSuccess(`식사 인원 ${mealCount}명이 성공적으로 등록되었습니다. (${mealCd === 'M' ? '아침' : mealCd === 'A' ? '점심' : mealCd === 'E' ? '저녁' : '기타'} 식사)`);
       
       // 식사 인원 초기화
       setMealCount(0);
-
+      
       // 팝업 닫기
       setVisitorInfo(null);
 
       // roomNumber 초기화
       setRoomNumber('');
     } catch (err) {
-      console.error('Exception details:', err);
-      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
-        setError('인터넷 연결이 끊어졌습니다. 연결을 확인하고 다시 시도해 주세요.');
-      } else {
-        setError(`오류가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
-      }
+      console.error('Exception:', err);
+      setError('오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
@@ -308,7 +333,7 @@ export default function MealCheckPage() {
                       +
                     </button>
                   </div>
-                  <p className="text-center text-gray-600 text-4xl mb-2">전체 인원: {visitorInfo.guest_num}명</p>
+                  <p className="text-center text-gray-600 text-2xl mb-2">최대 인원: 4명</p>
                   
                   {warning && (
                     <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mt-4">

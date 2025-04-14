@@ -7,8 +7,9 @@ interface MealInfo {
   id: number;
   room_no: string;
   org: string;
-  meal_date: string;
+  meal_ymd: string;
   meal_cd: string;
+  meal_time: string;
   eat_num: number;
 }
 
@@ -46,7 +47,7 @@ export default function MealListPage() {
       let query = supabase
         .from('kmc_meal_mgmt')
         .select('*')
-        .eq('meal_date', formattedDate);
+        .eq('meal_ymd', formattedDate);
       
       // 방번호가 입력된 경우 방번호 조건 추가
       if (searchRoomNo) {
@@ -54,7 +55,7 @@ export default function MealListPage() {
       }
       
       // 쿼리 실행
-      const { data, error } = await query.order('meal_date', { ascending: false });
+      const { data, error } = await query.order('meal_ymd', { ascending: false });
 
       if (error) {
         console.error('Error fetching meal data:', error);
@@ -164,6 +165,7 @@ export default function MealListPage() {
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">방번호</th>
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 날짜</th>
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 코드</th>
+                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 시간</th>
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 인원</th>                   
                   </tr>
                 </thead>
@@ -171,8 +173,9 @@ export default function MealListPage() {
                   {mealList.map((meal) => (
                     <tr key={meal.id} className="border-t border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm text-gray-700">{meal.room_no}</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{formatDate(meal.meal_date)}</td>
+                      <td className="py-3 px-4 text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
                       <td className="py-3 px-4 text-sm text-gray-700">{meal.meal_cd}</td>
+                      <td className="py-3 px-4 text-sm text-gray-700">{formatTime(meal.meal_time)}</td>
                       <td className="py-3 px-4 text-sm text-gray-700">{meal.eat_num}명</td>                      
                     </tr>
                   ))}

@@ -110,21 +110,17 @@ export default function Dashboard() {
                 <table className="table-fixed">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">친구이름</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">지역명</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">오는 시간</th>                      
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">가족수</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">상태</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">방정보</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">이름</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">객실</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">오는 시간</th>                      
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">인원</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">지역</th>                      
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {incomingFriends.map((friend, index) => (
                       <tr key={`${friend.kmc_cd}-${index}`}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer truncate" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.location_nm}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.check_in_hhmm}</td>                        
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.guest_num}명</td>
                         <td className="px-6 py-4 whitespace-nowrap truncate">
                           <span className={`px-3 py-1 rounded-full text-sm ${
                             friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 
@@ -134,7 +130,11 @@ export default function Dashboard() {
                             {reservationStatusMap[friend.status_cd as ReservationStatus]}
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer truncate" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.room_no}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.check_in_hhmm}</td>                        
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.guest_num}명</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.location_nm}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -145,39 +145,41 @@ export default function Dashboard() {
 
           {/* 오늘 가는 친구 목록 */}
           <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">오늘 가는 친구</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">오늘 가는 친구</h2>
+            </div>
             {loading ? (
               <div className="text-center py-4">로딩 중...</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full table-fixed">
+                <table className="table-fixed">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">친구이름</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">지역명</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">가는 시간</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">가족수</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">상태</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">방정보</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">이름</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">객실</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">가는 시간</th>                      
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 whitespace-nowrap">인원</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">지역</th>                      
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {outgoingFriends.map((friend, index) => (
                       <tr key={`${friend.kmc_cd}-${index}`}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.location_nm}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.check_out_hhmm}  </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.guest_num}명</td>
                         <td className="px-6 py-4 whitespace-nowrap truncate">
                           <span className={`px-3 py-1 rounded-full text-sm ${
-                            friend.status_cd === 'I' ? 'bg-pink-100 text-pink-800' 
-                            : friend.status_cd === 'O' ? 'bg-green-100 text-green-800' 
+                            friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 
+                            : friend.status_cd === 'I' ? 'bg-blue-100 text-blue-800' 
                               :'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          }`}>                            
                             {reservationStatusMap[friend.status_cd as ReservationStatus]}
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer truncate" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.room_no}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.check_out_hhmm}</td>                        
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.guest_num}명</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">{friend.location_nm}</td>
                       </tr>
                     ))}
                   </tbody>

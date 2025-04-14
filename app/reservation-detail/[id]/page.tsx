@@ -36,6 +36,10 @@ export default function RoomDetail() {
   const router = useRouter();
   const [reservation, setReservation] = useState<KmcInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [memo, setMemo] = useState('');
+  const [savingMemo, setSavingMemo] = useState(false);
+  const [memoError, setMemoError] = useState('');
+  const [memoSuccess, setMemoSuccess] = useState('');
 
   // 데이터 가져오기 함수
   const fetchReservation = async () => {
@@ -53,10 +57,43 @@ export default function RoomDetail() {
       if (error) throw error;
 
       setReservation(data);
+      setMemo(data.memo || '');
     } catch (error) {
       console.error('Error fetching reservation:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 메모 저장 함수
+  const saveMemo = async () => {
+    if (!reservation) return;
+    
+    try {
+      setSavingMemo(true);
+      setMemoError('');
+      setMemoSuccess('');
+      
+      const { error } = await supabase
+        .from('kmc_info')
+        .update({ memo: memo })
+        .eq('kmc_cd', reservation.kmc_cd)
+        .eq('seq_no', reservation.seq_no);
+      
+      if (error) throw error;
+      
+      setMemoSuccess('메모가 성공적으로 저장되었습니다.');
+      
+      // 3초 후 성공 메시지 숨기기
+      setTimeout(() => {
+        setMemoSuccess('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error saving memo:', error);
+      setMemoError('메모 저장 중 오류가 발생했습니다.');
+    } finally {
+      setSavingMemo(false);
     }
   };
 
@@ -133,8 +170,9 @@ export default function RoomDetail() {
               <div className="bg-white rounded-3xl p-6 shadow-lg">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-800">예약 상세 정보</h2>
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    reservation.status_cd === 'I' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  <span className={`px-8 py-2 rounded-full text-lg font-bold ${
+                    reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' :
+                        reservation.status_cd === 'I' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                    {reservationStatusMap[reservation.status_cd as ReservationStatus]}
                   </span>
@@ -198,16 +236,49 @@ export default function RoomDetail() {
                 {/* 메모 */}
                 <div className="mt-6 space-y-2">
                   <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">메모</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{reservation.seq_no || '메모 없음'}</p>
+                  <textarea
+                    value={memo}
+                    onChange={(e) => setMemo(e.target.value)}
+                    maxLength={1000}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={5}
+                    placeholder="메모를 입력하세요 (최대 1000자)"
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">{memo.length}/1000</span>
+                    <button
+                      onClick={saveMemo}
+                      disabled={savingMemo}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300"
+                    >
+                      {savingMemo ? '저장 중...' : '메모 저장'}
+                    </button>
+                  </div>
+                  {memoError && (
+                    <p className="text-red-500 text-sm">{memoError}</p>
+                  )}
+                  {memoSuccess && (
+                    <p className="text-green-500 text-sm">{memoSuccess}</p>
+                  )}
                 </div>
 
                 {/* 상태 변경 버튼 */}
                 <div className="mt-8 flex space-x-4">
                   <button
+                    onClick={() => updateStatus('S')}
+                    className={`px-4 py-2 rounded-lg ${
+                      reservation.status_cd === 'I'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-yellow-100'
+                    }`}
+                  >
+                    예약
+                  </button>
+                  <button
                     onClick={() => updateStatus('I')}
                     className={`px-4 py-2 rounded-lg ${
                       reservation.status_cd === 'S'
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-blue-500 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-green-100'
                     }`}
                   >

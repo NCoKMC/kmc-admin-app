@@ -150,7 +150,7 @@ export default function Reservations() {
                     <tr className="bg-gray-50">
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">예약자</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">방번호</th>
+                      
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크인</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">체크아웃</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역</th>
@@ -175,7 +175,6 @@ export default function Reservations() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" >
                           {reservation.user_nm}
                         </td>                                              
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{reservation.room_no}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_in_hhmm}
                         </td>
