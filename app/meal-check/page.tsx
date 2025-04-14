@@ -176,7 +176,7 @@ export default function MealCheckPage() {
       const mealData = {
         room_no: roomNumber,
         org: 'K',
-        meal_ymd: today,
+        meal_ymd: today.replace(/-/g, ''),
         meal_time: currentTime,
         meal_cd: mealCd,
         eat_num: mealCount
@@ -194,6 +194,10 @@ export default function MealCheckPage() {
         console.error('Error details:', error);
         if (error.message.includes('Failed to fetch')) {
           setError('인터넷 연결이 끊어졌습니다. 연결을 확인하고 다시 시도해 주세요.');
+        } else if (error.message.includes('PGRST116')) {
+          setError('해당 방번호에 입실 중인 방문자가 없습니다.');
+        } else if (error.message.includes('duplicate key value violates unique constraint "kmc_meal_mgmt_pkey"')) {
+          setError('이미 식사 정보가 등록되었습니다.');
         } else {
           setError(`식사 정보 저장 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
         }
