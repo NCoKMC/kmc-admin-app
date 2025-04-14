@@ -80,13 +80,13 @@ export function useAuth() {
           }
         }
         
-        // 시작 페이지('/')에서는 리디렉션하지 않음
-        if (!session && pathname !== '/') {
+        // 시작 페이지('/start-page')에서는 리디렉션하지 않음
+        if (!session && pathname !== '/start-page') {
           router.push('/login');
         }
       } catch (error) {
         console.error('인증 확인 중 오류 발생:', error);
-        if (pathname !== '/') {
+        if (pathname !== '/start-page') {
           router.push('/login');
         }
       } finally {
@@ -119,7 +119,7 @@ export function useAuth() {
           setUserName(null);
         }
         
-        if (event === 'SIGNED_OUT' && pathname !== '/') {
+        if (event === 'SIGNED_OUT' && pathname !== '/start-page') {
           router.push('/login');
         }
       }
