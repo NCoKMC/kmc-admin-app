@@ -38,11 +38,11 @@ export default function LoginPage() {
       if (error) {
         throw error;
       }
-
+        
       // 2. 사용자 정보에서 관리자 권한 확인
       if (data.user) {
         const { data: userData, error: userError } = await supabase
-          .from('user')
+          .from('kmc_adms')
           .select('adm_yn, adm_grade')
           .eq('email', email)
           .single();
@@ -50,9 +50,9 @@ export default function LoginPage() {
         if (userError) {
           throw userError;
         }
-
+        console.log(userData);
         // 관리자 권한 확인
-        if (!userData || userData.adm_yn !== 'Y' || userData.adm_grade === null) {
+        if (!userData || userData.adm_yn !== 'Y') {
           // 관리자 권한이 없는 경우 로그아웃 처리
           await supabase.auth.signOut();
           setError('관리자 권한이 없습니다. 관리자에게 승인을 요청하세요.');

@@ -194,7 +194,7 @@ export default function MealListPage() {
                   </thead>
                   <tbody>
                     {mealList.map((meal) => (
-                      <tr key={meal.id} className="border-t border-gray-200 hover:bg-gray-50">
+                      <tr key={meal.room_no} className="border-t border-gray-200 hover:bg-gray-50">
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.room_no}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.meal_cd}</td>

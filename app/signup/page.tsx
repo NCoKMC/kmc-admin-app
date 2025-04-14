@@ -9,6 +9,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function SignUpPage() {
     }
 
     try {
+      // 1. Supabase Auth로 회원가입
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -34,13 +36,36 @@ export default function SignUpPage() {
         },
       });
 
+      
+
       if (error) {
         throw error;
       }
-
+      console.log(data.user);
       if (data.user) {
+        // 2. kmc_adms 테이블에 사용자 정보 추가
+        const { error: insertError } = await supabase
+          .from('kmc_adms')
+          .insert([
+            {
+              email: email,
+              name: name,
+              adm_yn: 'N', // 기본적으로 관리자 권한 없음
+              adm_grade: '0',  // 관리자 등급 없음              
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          ]);
+
+        if (insertError) {
+          console.error('사용자 정보 추가 중 오류:', insertError);
+          // 사용자 정보 추가 실패 시 회원가입 취소
+          await supabase.auth.signOut();
+          throw new Error('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+
         // 회원가입 성공 메시지 표시
-        alert('회원가입이 완료되었습니다. 이메일을 확인해주세요.');
+        alert('회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.');
         router.push('/login');
       }
     } catch (error: any) {
@@ -76,6 +101,23 @@ export default function SignUpPage() {
         
         {/* 회원가입 폼 */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 이름 입력 */}
+          <div className="space-y-1">
+            <label htmlFor="name" className="block text-sm text-gray-600">이름</label>
+            <div className="relative">
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="홍길동"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
+                required
+                disabled={loading}
+              />
+            </div>
+          </div>
+
           {/* 이메일 입력 */}
           <div className="space-y-1">
             <label htmlFor="email" className="block text-sm text-gray-600">이메일</label>
