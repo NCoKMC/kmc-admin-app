@@ -29,12 +29,29 @@ function RoomDetailContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [checkboxStates, setCheckboxStates] = useState({
     bipum_chk_yn: 'N',
     clear_chk_yn: 'N',
     insp_chk_yn: 'N'
   });
   const { isAuthenticated, loading: authLoading } = useAuth();
+
+  // 화면 크기 감지
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // 초기 체크
+    checkIfMobile();
+    
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', checkIfMobile);
+    
+    // 클린업
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {

@@ -40,8 +40,30 @@ export default function RoomList() {
   const [selectedStatus, setSelectedStatus] = useState<RoomStatus | '전체'>('전체');
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isLargeMobile, setIsLargeMobile] = useState(false);
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
+
+  // 화면 크기 감지
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 480);
+      setIsLargeMobile(width >= 480 && width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    
+    // 초기 체크
+    checkScreenSize();
+    
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', checkScreenSize);
+    
+    // 클린업
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -144,91 +166,90 @@ export default function RoomList() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navigation />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="min-h-screen bg-[#1e3a8a] p-8">
+      <main className="w-full">
+        <div className="min-h-screen bg-[#1e3a8a] p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-            {/* 헤더 */}
-            <div className="bg-white rounded-3xl p-6 shadow-lg mb-8">
-              <h1 className="text-2xl font-semibold text-gray-800">방 목록</h1>
-              
-              {/* 상태 필터 */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  onClick={() => setSelectedStatus('전체')}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium ${
-                    selectedStatus === '전체' 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                  }`}
-                >
-                  전체
-                </button>
-                {Object.keys(roomStatusColors).map((status) => (
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8">
+              {/* 헤더 */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">방 목록</h1>
+                
+                {/* 상태 필터 */}
+                <div className="mt-2 sm:mt-3 md:mt-4 flex flex-wrap gap-2">
                   <button
-                    key={status}
-                    onClick={() => setSelectedStatus(status as RoomStatus)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium ${
-                      selectedStatus === status 
+                    onClick={() => setSelectedStatus('전체')}
+                    className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm sm:text-base font-medium ${
+                      selectedStatus === '전체' 
                         ? 'bg-blue-500 text-white' 
-                        : `${roomStatusColors[status as RoomStatus]} hover:opacity-80`
+                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                     }`}
                   >
-                    {roomStatusMap[status as RoomStatus]}
+                    전체
                   </button>
-                ))}
+                  {Object.keys(roomStatusColors).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setSelectedStatus(status as RoomStatus)}
+                      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm sm:text-base font-medium ${
+                        selectedStatus === status 
+                          ? 'bg-blue-500 text-white' 
+                          : `${roomStatusColors[status as RoomStatus]} hover:opacity-80`
+                      }`}
+                    >
+                      {roomStatusMap[status as RoomStatus]}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* 방 목록 테이블 */}
-            <div className="bg-white rounded-3xl p-6 shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <div className="max-h-[900px] overflow-y-auto">
-                  <table className="min-w-full divide-y divide-gray-200 table-fixed">
-                    <thead className="bg-gray-50 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                          방번호
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                          방상태
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                          입실/퇴실
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                          점검여부
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredRooms.length > 0 ? (
-                        filteredRooms.map((room, index) => (
-                          <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate">
-                              {room.room_no}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap truncate">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roomStatusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
-                                {roomStatusMap[room.status_cd as RoomStatus] || '알 수 없음'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
-                              {room.use_yn === 'Y' ? '입실' : '공실'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate">
-                              {room.insp_chk_yn}
+              {/* 방 목록 테이블 */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg overflow-hidden">
+                <div className="flex justify-between items-center mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800">방 목록</h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                            방번호
+                          </th>
+                          <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                            방상태
+                          </th>
+                          <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                            입실/퇴실
+                          </th>                          
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filteredRooms.length > 0 ? (
+                          filteredRooms.map((room, index) => (
+                            <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
+                              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 w-auto">
+                                {room.room_no}
+                              </td>
+                              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap w-auto">
+                                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm leading-5 font-semibold ${roomStatusColors[room.status_cd as RoomStatus] || 'bg-gray-100 text-gray-800'}`}>
+                                  {roomStatusMap[room.status_cd as RoomStatus] || '알 수 없음'}
+                                </span>
+                              </td>
+                              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
+                                {room.use_yn === 'Y' ? '입실' : '공실'}
+                              </td>                              
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-500">
+                              데이터가 없습니다.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
-                            데이터가 없습니다.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

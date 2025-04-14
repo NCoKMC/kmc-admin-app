@@ -54,6 +54,7 @@ export async function checkDuplicateLogin(email: string) {
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const router = useRouter();
   
   useEffect(() => {
@@ -61,6 +62,10 @@ export function useAuth() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
+        
+        if (session?.user?.email) {
+          setUserEmail(session.user.email);
+        }
         
         if (!session) {
           router.push('/login');
@@ -80,6 +85,12 @@ export function useAuth() {
       (event, session) => {
         setIsAuthenticated(!!session);
         
+        if (session?.user?.email) {
+          setUserEmail(session.user.email);
+        } else {
+          setUserEmail(null);
+        }
+        
         if (event === 'SIGNED_OUT') {
           router.push('/login');
         }
@@ -91,5 +102,5 @@ export function useAuth() {
     };
   }, [router]);
   
-  return { isAuthenticated, loading };
+  return { isAuthenticated, loading, userEmail };
 } 

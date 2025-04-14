@@ -20,6 +20,28 @@ export default function MealListPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [isMobile, setIsMobile] = useState(false);
+  const [isLargeMobile, setIsLargeMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  // 화면 크기 감지
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 480);
+      setIsLargeMobile(width >= 480 && width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    
+    // 초기 체크
+    checkScreenSize();
+    
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', checkScreenSize);
+    
+    // 클린업
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // 오늘 날짜를 기본값으로 설정
   useEffect(() => {
@@ -95,17 +117,17 @@ export default function MealListPage() {
     <div className="min-h-screen bg-[#1e3a8a]">
       <Navigation />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-3xl p-6 shadow-lg">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">식사 확인 목록</h1>
+      <main className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-4 sm:py-5 md:py-6 lg:py-8">
+        <div className="bg-white rounded-3xl p-2 sm:p-3 md:p-4 lg:p-6 shadow-lg">
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 md:mb-5 lg:mb-6">식사 확인 목록</h1>
           
           {/* 검색 조건 영역 */}
-          <div className="mb-6 bg-blue-50 p-4 rounded-xl">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">검색 조건</h2>
+          <div className="mb-3 sm:mb-4 md:mb-5 lg:mb-6 bg-blue-50 p-2 sm:p-3 md:p-4 rounded-xl">
+            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 md:mb-4">검색 조건</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4">
               <div>
-                <label htmlFor="searchDate" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="searchDate" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   날짜
                 </label>
                 <input
@@ -113,12 +135,12 @@ export default function MealListPage() {
                   id="searchDate"
                   value={searchDate}
                   onChange={(e) => setSearchDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm md:text-base"
                 />
               </div>
               
               <div>
-                <label htmlFor="searchRoomNo" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="searchRoomNo" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   방번호 (선택)
                 </label>
                 <input
@@ -127,7 +149,7 @@ export default function MealListPage() {
                   value={searchRoomNo}
                   onChange={(e) => setSearchRoomNo(e.target.value)}
                   placeholder="방번호 입력"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm md:text-base"
                 />
               </div>
             </div>
@@ -135,7 +157,7 @@ export default function MealListPage() {
             <button
               onClick={handleSearch}
               disabled={loading}
-              className={`w-full py-3 rounded-xl text-white font-bold text-lg ${
+              className={`w-full py-2 sm:py-2.5 md:py-3 rounded-xl text-white font-bold text-sm sm:text-base md:text-lg ${
                 loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
               } transition-colors`}
             >
@@ -145,13 +167,13 @@ export default function MealListPage() {
           
           {/* 메시지 표시 영역 */}
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-lg mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm md:text-base">
               {error}
             </div>
           )}
           
           {success && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-lg mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm md:text-base">
               {success}
             </div>
           )}
@@ -159,28 +181,30 @@ export default function MealListPage() {
           {/* 결과 표시 영역 */}
           {mealList.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">방번호</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 날짜</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 코드</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 시간</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">식사 인원</th>                   
-                  </tr>
-                </thead>
-                <tbody>
-                  {mealList.map((meal) => (
-                    <tr key={meal.id} className="border-t border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-700">{meal.room_no}</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{meal.meal_cd}</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{formatTime(meal.meal_time)}</td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{meal.eat_num}명</td>                      
+              <div className="max-h-[50vh] sm:max-h-[55vh] md:max-h-[60vh] lg:max-h-[65vh] overflow-y-auto">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                  <thead className="bg-gray-100 sticky top-0 z-10">
+                    <tr>
+                      <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">방번호</th>
+                      <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 날짜</th>
+                      <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 코드</th>
+                      <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 시간</th>
+                      <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 인원</th>                   
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {mealList.map((meal) => (
+                      <tr key={meal.id} className="border-t border-gray-200 hover:bg-gray-50">
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.room_no}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.meal_cd}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatTime(meal.meal_time)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.eat_num}명</td>                      
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
