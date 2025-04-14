@@ -326,10 +326,10 @@ export default function MealCheckPage() {
                     <p className="text-gray-600 text-2xl sm:text-4xl mb-1 sm:mb-2">방문자</p>
                     <p className="text-2xl sm:text-4xl font-bold">{visitorInfo.user_nm}</p>
                   </div>
-                  <div>
+                  {/* <div>
                     <p className="text-gray-600 text-2xl sm:text-4xl mb-1 sm:mb-2">인원수</p>
                     <p className="text-2xl sm:text-4xl font-bold">{visitorInfo.guest_num}명</p>
-                  </div>
+                  </div> */}
                 </div>
                 
                 {/* 식사 인원 입력 영역 */}

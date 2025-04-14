@@ -29,6 +29,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      // 1. 먼저 이메일과 비밀번호로 인증
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -38,20 +39,39 @@ export default function LoginPage() {
         throw error;
       }
 
-      // 중복 로그인 체크 및 다른 세션 로그아웃
-      const hasOtherSessions = await checkDuplicateLogin(email);
-      if (hasOtherSessions) {
-        console.log('다른 기기에서 로그인된 세션이 로그아웃되었습니다.');
-      }
-
-      // 로그인 정보 저장
-      if (rememberMe) {
-        localStorage.setItem('savedEmail', email);
-      } else {
-        localStorage.removeItem('savedEmail');
-      }
-
+      // 2. 사용자 정보에서 관리자 권한 확인
       if (data.user) {
+        const { data: userData, error: userError } = await supabase
+          .from('user')
+          .select('adm_yn, adm_grade')
+          .eq('email', email)
+          .single();
+
+        if (userError) {
+          throw userError;
+        }
+
+        // 관리자 권한 확인
+        if (!userData || userData.adm_yn !== 'Y' || userData.adm_grade === null) {
+          // 관리자 권한이 없는 경우 로그아웃 처리
+          await supabase.auth.signOut();
+          setError('관리자 권한이 없습니다. 관리자에게 승인을 요청하세요.');
+          return;
+        }
+
+        // 중복 로그인 체크 및 다른 세션 로그아웃
+        const hasOtherSessions = await checkDuplicateLogin(email);
+        if (hasOtherSessions) {
+          console.log('다른 기기에서 로그인된 세션이 로그아웃되었습니다.');
+        }
+
+        // 로그인 정보 저장
+        if (rememberMe) {
+          localStorage.setItem('savedEmail', email);
+        } else {
+          localStorage.removeItem('savedEmail');
+        }
+
         router.push('/dashboard');
       }
     } catch (error: any) {
