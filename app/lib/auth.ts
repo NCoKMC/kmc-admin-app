@@ -55,6 +55,7 @@ export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
   
   useEffect(() => {
@@ -65,6 +66,17 @@ export function useAuth() {
         
         if (session?.user?.email) {
           setUserEmail(session.user.email);
+          
+          // kmc_adms 테이블에서 사용자 이름 가져오기
+          const { data: userData, error: userError } = await supabase
+            .from('kmc_adms')
+            .select('name')
+            .eq('email', session.user.email)
+            .single();
+          
+          if (!userError && userData) {
+            setUserName(userData.name);
+          }
         }
         
         if (!session) {
@@ -82,13 +94,25 @@ export function useAuth() {
     
     // 인증 상태 변경 이벤트 리스너
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setIsAuthenticated(!!session);
         
         if (session?.user?.email) {
           setUserEmail(session.user.email);
+          
+          // kmc_adms 테이블에서 사용자 이름 가져오기
+          const { data: userData, error: userError } = await supabase
+            .from('kmc_adms')
+            .select('name')
+            .eq('email', session.user.email)
+            .single();
+          
+          if (!userError && userData) {
+            setUserName(userData.name);
+          }
         } else {
           setUserEmail(null);
+          setUserName(null);
         }
         
         if (event === 'SIGNED_OUT') {
@@ -102,5 +126,5 @@ export function useAuth() {
     };
   }, [router]);
   
-  return { isAuthenticated, loading, userEmail };
+  return { isAuthenticated, loading, userEmail, userName };
 } 

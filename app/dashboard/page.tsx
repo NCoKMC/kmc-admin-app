@@ -118,7 +118,7 @@ export default function Dashboard() {
           {/* 오늘 오는 친구 목록 */}
           <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
             <div className="flex justify-between items-center mb-3 sm:mb-4">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-800">오늘 오는 친구</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800">입실예정</h2>
             </div>
             {loading ? (
               <div className="text-center py-3 sm:py-4 text-sm sm:text-base">로딩 중...</div>
@@ -163,7 +163,7 @@ export default function Dashboard() {
           {/* 오늘 가는 친구 목록 */}
           <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
             <div className="flex justify-between items-center mb-3 sm:mb-4">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-800">오늘 가는 친구</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800">퇴실예정</h2>
             </div>
             {loading ? (
               <div className="text-center py-3 sm:py-4 text-sm sm:text-base">로딩 중...</div>
