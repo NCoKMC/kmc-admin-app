@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { redirect } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 // 인증 상태를 확인하는 함수
 export async function checkAuth() {
@@ -57,6 +57,7 @@ export function useAuth() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
   
   useEffect(() => {
     const checkSession = async () => {
@@ -79,12 +80,15 @@ export function useAuth() {
           }
         }
         
-        if (!session) {
+        // 시작 페이지('/')에서는 리디렉션하지 않음
+        if (!session && pathname !== '/') {
           router.push('/login');
         }
       } catch (error) {
         console.error('인증 확인 중 오류 발생:', error);
-        router.push('/login');
+        if (pathname !== '/') {
+          router.push('/login');
+        }
       } finally {
         setLoading(false);
       }
@@ -115,7 +119,7 @@ export function useAuth() {
           setUserName(null);
         }
         
-        if (event === 'SIGNED_OUT') {
+        if (event === 'SIGNED_OUT' && pathname !== '/') {
           router.push('/login');
         }
       }
@@ -124,7 +128,7 @@ export function useAuth() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, pathname]);
   
   return { isAuthenticated, loading, userEmail, userName };
 } 
