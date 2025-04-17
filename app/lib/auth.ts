@@ -54,81 +54,89 @@ export async function checkDuplicateLogin(email: string) {
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
+    // 초기 세션 확인
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // 세션이 있으면 사용자 정보 설정
+        setUser(session.user);
+        setUserEmail(session.user.email || null);
+        setIsAuthenticated(true);
         
-        if (session?.user?.email) {
-          setUserEmail(session.user.email);
-          
-          // kmc_adms 테이블에서 사용자 이름 가져오기
-          const { data: userData, error: userError } = await supabase
-            .from('kmc_adms')
-            .select('name')
-            .eq('email', session.user.email)
-            .single();
-          
-          if (!userError && userData) {
-            setUserName(userData.name);
-          }
+        // 사용자 이름 가져오기
+        if (session.user.email) {
+          fetchUserName(session.user.email);
         }
-        
-        // 시작 페이지('/start-page')에서는 리디렉션하지 않음
-        if (!session && pathname !== '/start-page') {
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error('인증 확인 중 오류 발생:', error);
+      } else {
+        // 세션이 없으면 로그인 페이지로 리디렉션 (start-page 제외)
         if (pathname !== '/start-page') {
           router.push('/login');
         }
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    checkSession();
-    
+      setLoading(false);
+    });
+
     // 인증 상태 변경 이벤트 리스너
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setIsAuthenticated(!!session);
-        
-        if (session?.user?.email) {
-          setUserEmail(session.user.email);
+        if (event === 'SIGNED_IN') {
+          // 로그인 시 사용자 정보 설정
+          setUser(session?.user || null);
+          setUserEmail(session?.user?.email || null);
+          setIsAuthenticated(true);
           
-          // kmc_adms 테이블에서 사용자 이름 가져오기
-          const { data: userData, error: userError } = await supabase
-            .from('kmc_adms')
-            .select('name')
-            .eq('email', session.user.email)
-            .single();
-          
-          if (!userError && userData) {
-            setUserName(userData.name);
+          if (session?.user?.email) {
+            // 사용자 이름 가져오기
+            fetchUserName(session.user.email);
           }
-        } else {
+        } else if (event === 'SIGNED_OUT') {
+          // 로그아웃 시 사용자 정보 초기화
+          setUser(null);
           setUserEmail(null);
           setUserName(null);
-        }
-        
-        if (event === 'SIGNED_OUT' && pathname !== '/start-page') {
-          router.push('/login');
+          setIsAuthenticated(false);
+          
+          // start-page가 아닌 경우에만 로그인 페이지로 리디렉션
+          if (pathname !== '/start-page') {
+            router.push('/login');
+          }
         }
       }
     );
     
+    // 컴포넌트 언마운트 시 이벤트 리스너 정리
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [router, pathname]);
   
-  return { isAuthenticated, loading, userEmail, userName };
+  // 사용자 이름 가져오기 함수
+  const fetchUserName = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('kmc_adms')
+        .select('name')
+        .eq('email', email)
+        .single();
+      
+      if (error) {
+        console.error('사용자 이름 가져오기 오류:', error);
+        return;
+      }
+      
+      if (data) {
+        setUserName(data.name);
+      }
+    } catch (error) {
+      console.error('사용자 이름 가져오기 오류:', error);
+    }
+  };
+  
+  return { isAuthenticated, loading, user, userEmail, userName };
 } 
