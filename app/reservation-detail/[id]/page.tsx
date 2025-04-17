@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation';
 import { supabase } from '../../lib/supabase';
@@ -41,6 +41,8 @@ export default function RoomDetail() {
   const [memoError, setMemoError] = useState('');
   const [memoSuccess, setMemoSuccess] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const memoTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const originalScrollPosition = useRef(0);
 
   // 화면 크기 감지
   useEffect(() => {
@@ -56,6 +58,49 @@ export default function RoomDetail() {
     
     // 클린업
     return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
+  // 메모 textarea 포커스 처리
+  useEffect(() => {
+    const textarea = memoTextareaRef.current;
+    if (!textarea) return;
+
+    const handleFocus = () => {
+      // 현재 스크롤 위치 저장
+      originalScrollPosition.current = window.scrollY;
+      
+      // textarea가 화면 하단에 있는지 확인
+      const textareaRect = textarea.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // textarea가 화면 하단에 있으면 스크롤 조정
+      if (textareaRect.bottom > viewportHeight * 0.7) {
+        // textarea가 화면 중앙에 오도록 스크롤
+        const scrollTo = window.scrollY + (textareaRect.top - viewportHeight * 0.3);
+        window.scrollTo({
+          top: scrollTo,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    const handleBlur = () => {
+      // 포커스 해제 시 원래 스크롤 위치로 복귀
+      setTimeout(() => {
+        window.scrollTo({
+          top: originalScrollPosition.current,
+          behavior: 'smooth'
+        });
+      }, 100); // 약간의 지연을 두어 키보드가 완전히 사라진 후 스크롤
+    };
+
+    textarea.addEventListener('focus', handleFocus);
+    textarea.addEventListener('blur', handleBlur);
+
+    return () => {
+      textarea.removeEventListener('focus', handleFocus);
+      textarea.removeEventListener('blur', handleBlur);
+    };
   }, []);
 
   // 데이터 가져오기 함수
@@ -251,6 +296,7 @@ export default function RoomDetail() {
                 <div className="mt-4 sm:mt-6 space-y-2">
                   <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-700 border-b pb-1 sm:pb-2">메모</h3>
                   <textarea
+                    ref={memoTextareaRef}
                     value={memo}
                     onChange={(e) => setMemo(e.target.value)}
                     maxLength={1000}
