@@ -186,13 +186,15 @@ export default function RoomDetail() {
               {/* 예약 정보 카드 */}
               <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-0">
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">예약 상세 정보</h2>
-                  <span className={`px-4 sm:px-6 py-1 sm:py-2 rounded-full text-sm sm:text-base lg:text-lg font-bold ${
-                    reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' :
-                        reservation.status_cd === 'I' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                   {reservationStatusMap[reservation.status_cd as ReservationStatus]}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">예약 상세 정보</h2>
+                    <span className={`px-4 sm:px-6 py-1 sm:py-2 rounded-full text-sm sm:text-base lg:text-lg font-bold ${
+                      reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' :
+                          reservation.status_cd === 'I' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                     {reservationStatusMap[reservation.status_cd as ReservationStatus]}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -207,13 +209,8 @@ export default function RoomDetail() {
                       <div className="text-gray-500 text-sm sm:text-base">연락처</div>
                       <div className="col-span-2 font-medium text-sm sm:text-base">                        
                         {reservation.phone_num.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}
-                        </div>
-                      
-                    </div>
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2">
-                      <div className="text-gray-500 text-sm sm:text-base">이메일</div>
-                      <div className="col-span-2 font-medium text-sm sm:text-base break-all">{reservation.user_email}</div>
-                    </div>
+                        </div>                      
+                    </div>                    
                     <div className="grid grid-cols-3 gap-1 sm:gap-2">
                       <div className="text-gray-500 text-sm sm:text-base">지역</div>
                       <div className="col-span-2 font-medium text-sm sm:text-base">{reservation.location_nm}</div>
