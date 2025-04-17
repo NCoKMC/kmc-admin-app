@@ -23,6 +23,26 @@ export default function LoginPage() {
     }
   }, []);
 
+  // 키보드가 나타날 때 자동으로 스크롤
+  useEffect(() => {
+    const handleFocus = () => {
+      setTimeout(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      }, 300);
+    };
+
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+      passwordInput.addEventListener('focus', handleFocus);
+    }
+
+    return () => {
+      if (passwordInput) {
+        passwordInput.removeEventListener('focus', handleFocus);
+      }
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
