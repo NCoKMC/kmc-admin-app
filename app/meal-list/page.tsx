@@ -124,7 +124,7 @@ export default function MealListPage() {
     }
 
     try {
-      // 엑셀 데이터 준비
+      // 엑셀 데이터 준비 20250421 추가
       const excelData = mealList.map(meal => ({
         '방번호': meal.room_no,
         '식사 날짜': formatDate(meal.meal_ymd),
