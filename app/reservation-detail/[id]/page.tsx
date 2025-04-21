@@ -75,8 +75,8 @@ export default function RoomDetail() {
       
       // textarea가 화면 하단에 있으면 스크롤 조정
       if (textareaRect.bottom > viewportHeight * 0.7) {
-        // textarea가 화면 상단에 오도록 스크롤
-        const scrollTo = window.scrollY + (textareaRect.top - 100);
+        // textarea가 화면 중앙에 오도록 스크롤
+        const scrollTo = window.scrollY + (textareaRect.top - viewportHeight * 0.3);
         window.scrollTo({
           top: scrollTo,
           behavior: 'smooth'
@@ -91,7 +91,7 @@ export default function RoomDetail() {
           top: originalScrollPosition.current,
           behavior: 'smooth'
         });
-      }, 300); // 지연 시간을 늘려서 키보드가 완전히 사라진 후 스크롤
+      }, 100); // 약간의 지연을 두어 키보드가 완전히 사라진 후 스크롤
     };
 
     textarea.addEventListener('focus', handleFocus);
