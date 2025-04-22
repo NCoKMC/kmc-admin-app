@@ -34,6 +34,7 @@ export default function Navigation() {
     { name: '방 목록', path: '/room-list' },
     { name: '식사 확인', path: '/meal-check' },
     { name: '식사 확인 목록', path: '/meal-list' },
+    { name: '휴가신청', path: '/vacation' },
   ];
 
   return (
