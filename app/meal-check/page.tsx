@@ -12,7 +12,10 @@ interface VisitorInfo {
 
 export default function MealCheckPage() {
   const [roomNumber, setRoomNumber] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [visitorInfo, setVisitorInfo] = useState<VisitorInfo | null>(null);
+  const [manualInput, setManualInput] = useState(false);
+  const [manualName, setManualName] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -96,21 +99,19 @@ export default function MealCheckPage() {
       setWarning('');
       setSuccess('');
 
-      console.log(new Date().toISOString().split('T')[0].replace(/-/g, ''));
-      console.log(roomNumber);
-      
       const { data, error } = await supabase
         .from('kmc_info')
         .select('user_nm, guest_num, kmc_cd')
-        .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
-        .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .lte('check_in_ymd', selectedDate.replace(/-/g, ''))
+        .gte('check_out_ymd', selectedDate.replace(/-/g, ''))
         .like('room_no', `%${roomNumber}%`)
         .in('status_cd', ['I','S'])
         .single();
 
       if (error) {
         if (error.code === 'PGRST116') {
-          setError('해당 방번호에 입실 중인 방문자가 없습니다.');
+          setManualInput(true);
+          setManualName('');
         } else {
           setError('데이터를 가져오는 중 오류가 발생했습니다.');
           console.error('Error fetching data:', error);
@@ -126,13 +127,32 @@ export default function MealCheckPage() {
       };
       
       setVisitorInfo(modifiedData);
-      setMealCount(0); // 방문자 정보가 로드되면 식사 인원 초기화
+      setMealCount(0);
     } catch (err) {
       setError('오류가 발생했습니다.');
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleManualSubmit = () => {
+    if (!manualName.trim()) {
+      alert('방문자 이름을 입력해주세요.');
+      return;
+    }
+
+    if (mealCount <= 0) {
+      alert('식사 인원을 입력해주세요.');
+      return;
+    }
+
+    setVisitorInfo({
+      user_nm: manualName,
+      guest_num: 4,
+      kmc_cd: 'K'
+    });
+    setManualInput(false);
   };
 
   const handleSubmit = async () => {
@@ -245,6 +265,15 @@ export default function MealCheckPage() {
           
           {/* 방번호 입력 영역 */}
           <div className="mb-4 sm:mb-6">
+            {/* 날짜 입력 */}
+            <div className="mb-4 bg-gray-50 p-3 rounded-lg">              
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full p-2 sm:p-3 text-base sm:text-6xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
             <h2 className="text-2xl sm:text-3xl font-semibold text-gray-700 mb-2">방번호를 입력하세요</h2>
             <div className="text-6xl sm:text-8xl font-bold text-center mb-8 sm:mb-16 h-12">
               {roomNumber || '---'}
@@ -299,6 +328,70 @@ export default function MealCheckPage() {
           {success && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg mb-4 text-sm sm:text-base">
               {success}
+            </div>
+          )}
+          
+          {/* 수동 입력 모달 */}
+          {manualInput && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="bg-white border border-blue-200 rounded-xl p-4 sm:p-6 shadow-lg max-w-[72rem] w-full relative">
+                <button 
+                  onClick={() => setManualInput(false)}
+                  className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-red-500 hover:bg-red-600 text-white px-2 py-2 sm:px-3 sm:py-4 rounded-lg text-2xl sm:text-4xl font-medium flex items-center transition-colors"
+                  aria-label="돌아가기"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  돌아가기
+                </button>
+                
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">방문자 정보 입력</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 sm:mb-6">
+                  <div>
+                    <p className="text-gray-600 text-2xl sm:text-4xl mb-1 sm:mb-2">방번호</p>
+                    <p className="text-2xl sm:text-4xl font-bold">{roomNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-2xl sm:text-4xl mb-1 sm:mb-2">방문자 이름</p>
+                    <input
+                      type="text"
+                      value={manualName}
+                      onChange={(e) => setManualName(e.target.value)}
+                      className="w-full p-2 sm:p-3 text-2xl sm:text-4xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="이름을 입력하세요"
+                    />
+                  </div>
+                </div>
+
+                {/* 식사 인원 입력 */}
+                <div className="mt-4 sm:mt-6 border-t pt-4">
+                  <h3 className="text-2xl sm:text-4xl font-semibold text-gray-700 mb-2">식사 인원 입력</h3>
+                  <div className="flex items-center justify-center space-x-4 mb-2">
+                    <button
+                      onClick={() => handleMealCountChange(-1)}
+                      className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full text-xl sm:text-2xl font-bold flex items-center justify-center"
+                    >
+                      -
+                    </button>
+                    <div className="text-2xl sm:text-3xl font-bold w-12 sm:w-16 text-center">{mealCount}</div>
+                    <button
+                      onClick={() => handleMealCountChange(1)}
+                      className="bg-green-500 hover:bg-green-600 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full text-xl sm:text-2xl font-bold flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-center text-gray-600 text-xl sm:text-2xl mb-2">최대 인원: 4명</p>
+                </div>
+                
+                <button
+                  onClick={handleManualSubmit}
+                  className="w-full mt-4 py-4 sm:py-6 rounded-xl text-white font-bold text-2xl sm:text-4xl bg-purple-500 hover:bg-purple-600 transition-colors"
+                >
+                  확인
+                </button>
+              </div>
             </div>
           )}
           
