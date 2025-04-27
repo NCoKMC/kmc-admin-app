@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
+import * as XLSX from 'xlsx';
+import { useRouter } from 'next/navigation';
 
 interface MealInfo {
   id: number;
@@ -14,6 +16,7 @@ interface MealInfo {
 }
 
 export default function MealListPage() {
+  const router = useRouter();
   const [searchDate, setSearchDate] = useState<string>('');
   const [searchRoomNo, setSearchRoomNo] = useState<string>('');
   const [mealList, setMealList] = useState<MealInfo[]>([]);
@@ -113,13 +116,64 @@ export default function MealListPage() {
     return `${timeString.substring(0, 2)}:${timeString.substring(2, 4)}`;
   };
 
+  // 엑셀 다운로드 함수
+  const handleExcelDownload = () => {
+    if (mealList.length === 0) {
+      setError('다운로드할 데이터가 없습니다.');
+      return;
+    }
+
+    try {
+      // 엑셀 데이터 준비
+      const excelData = mealList.map(meal => ({
+        '방번호': meal.room_no,
+        '식사 날짜': formatDate(meal.meal_ymd),
+        '식사 코드': meal.meal_cd,
+        '식사 시간': formatTime(meal.meal_time),
+        '식사 인원': `${meal.eat_num}명`
+      }));
+
+      // 워크북 생성
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excelData);
+
+      // 워크시트를 워크북에 추가
+      XLSX.utils.book_append_sheet(wb, ws, '식사 목록');
+
+      // 파일명 설정 (현재 날짜 포함)
+      const fileName = `식사목록_${searchDate.replace(/-/g, '')}.xlsx`;
+
+      // 엑셀 파일 다운로드
+      XLSX.writeFile(wb, fileName);
+      setSuccess('엑셀 파일이 다운로드되었습니다.');
+    } catch (err) {
+      console.error('Excel download error:', err);
+      setError('엑셀 다운로드 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 로우 클릭 핸들러
+  const handleRowClick = (roomNo: string) => {
+    router.push(`/room-detail?roomNo=${roomNo}`);
+  };
+
   return (
     <div className="min-h-screen bg-[#1e3a8a]">
       <Navigation />
       
       <main className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-4 sm:py-5 md:py-6 lg:py-8">
         <div className="bg-white rounded-3xl p-2 sm:p-3 md:p-4 lg:p-6 shadow-lg">
-          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 md:mb-5 lg:mb-6">식사 확인 목록</h1>
+          <div className="flex justify-between items-center mb-3 sm:mb-4 md:mb-5 lg:mb-6">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800">식사 확인 목록</h1>
+            {mealList.length > 0 && (
+              <button
+                onClick={handleExcelDownload}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                엑셀 다운로드
+              </button>
+            )}
+          </div>
           
           {/* 검색 조건 영역 */}
           <div className="mb-3 sm:mb-4 md:mb-5 lg:mb-6 bg-blue-50 p-2 sm:p-3 md:p-4 rounded-xl">
@@ -194,7 +248,11 @@ export default function MealListPage() {
                   </thead>
                   <tbody>
                     {mealList.map((meal) => (
-                      <tr key={meal.room_no} className="border-t border-gray-200 hover:bg-gray-50">
+                      <tr 
+                        key={`${meal.room_no}-${meal.org}-${meal.meal_ymd}-${meal.meal_cd}`} 
+                        className="border-t border-gray-200 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleRowClick(meal.room_no)}
+                      >
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.room_no}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.meal_cd}</td>
