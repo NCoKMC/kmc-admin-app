@@ -29,12 +29,39 @@ import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
   // memo: string;
 //}
 
+// kmc_cd 생성 함수
+const generateKmcCd = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 export default function Reservations() {
   const [selectedYearMonth, setSelectedYearMonth] = useState<string>(new Date().toISOString().slice(0, 7));
   const [selectedStatus, setSelectedStatus] = useState<string>('전체');
   const [reservations, setReservations] = useState<KmcInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [showNewReservationModal, setShowNewReservationModal] = useState(false);
+  const [newReservation, setNewReservation] = useState({
+    seq_no: 0,
+    kmc_cd: '',
+    user_nm: '',
+    location_nm: '',
+    check_in_ymd: format(new Date(), 'yyyyMMdd'),
+    check_out_ymd: format(new Date(), 'yyyyMMdd'),
+    check_in_hhmm: '1400',
+    check_out_hhmm: '1100',
+    room_no: '',
+    guest_num: 1,
+    status_cd: 'S',
+    group_desc: '',
+    phone_num: '',
+    memo: ''
+  });
   const router = useRouter();
 
   // 화면 크기 감지
@@ -93,6 +120,36 @@ export default function Reservations() {
       console.error('Error fetching reservations:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 신규 예약 생성
+  const handleCreateReservation = async () => {
+    try {
+      // kmc_cd 생성
+      const kmc_cd = generateKmcCd();
+      // seq 생성 (YYYYmm 형식)
+      const seq_no = parseInt(format(new Date(), 'yyyyMM'));
+      const reservationData = {
+        ...newReservation,
+        kmc_cd,
+        seq_no
+      };
+      console.log(reservationData);
+      const { data, error } = await supabase
+        .from('kmc_info')
+        .insert([reservationData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setShowNewReservationModal(false);
+      fetchReservations();
+      router.push(`/reservation-detail/${data.kmc_cd}`);
+    } catch (error) {
+      console.error('Error creating reservation:', error);
+      alert('예약 생성 중 오류가 발생했습니다.');
     }
   };
 
@@ -157,6 +214,12 @@ export default function Reservations() {
           <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
             <div className="flex justify-between items-center mb-3 sm:mb-4">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-800">예약 목록</h2>
+              <button
+                onClick={() => setShowNewReservationModal(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                신규 예약
+              </button>
             </div>
             {loading ? (
               <div className="text-center py-4 text-base sm:text-lg">로딩 중...</div>
@@ -214,6 +277,130 @@ export default function Reservations() {
           </div>
         </div>
       </main>
+
+      {/* 신규 예약 모달 */}
+      {showNewReservationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">신규 예약</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">예약자</label>
+                <input
+                  type="text"
+                  value={newReservation.user_nm}
+                  onChange={(e) => setNewReservation({...newReservation, user_nm: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">지역</label>
+                <input
+                  type="text"
+                  value={newReservation.location_nm}
+                  onChange={(e) => setNewReservation({...newReservation, location_nm: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">체크인 날짜</label>
+                <input
+                  type="date"
+                  value={newReservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')}
+                  onChange={(e) => setNewReservation({...newReservation, check_in_ymd: e.target.value.replace(/-/g, '')})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">체크인 시간</label>
+                <input
+                  type="time"
+                  value={newReservation.check_in_hhmm.replace(/(\d{2})(\d{2})/, '$1:$2')}
+                  onChange={(e) => setNewReservation({...newReservation, check_in_hhmm: e.target.value.replace(':', '')})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">체크아웃 날짜</label>
+                <input
+                  type="date"
+                  value={newReservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')}
+                  onChange={(e) => setNewReservation({...newReservation, check_out_ymd: e.target.value.replace(/-/g, '')})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">체크아웃 시간</label>
+                <input
+                  type="time"
+                  value={newReservation.check_out_hhmm.replace(/(\d{2})(\d{2})/, '$1:$2')}
+                  onChange={(e) => setNewReservation({...newReservation, check_out_hhmm: e.target.value.replace(':', '')})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">객실 번호</label>
+                <input
+                  type="text"
+                  value={newReservation.room_no}
+                  onChange={(e) => setNewReservation({...newReservation, room_no: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">인원</label>
+                <input
+                  type="number"
+                  value={newReservation.guest_num}
+                  onChange={(e) => setNewReservation({...newReservation, guest_num: parseInt(e.target.value)})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
+                <input
+                  type="text"
+                  value={newReservation.phone_num}
+                  onChange={(e) => setNewReservation({...newReservation, phone_num: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">단체명</label>
+                <input
+                  type="text"
+                  value={newReservation.group_desc}
+                  onChange={(e) => setNewReservation({...newReservation, group_desc: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">메모</label>
+                <textarea
+                  value={newReservation.memo}
+                  onChange={(e) => setNewReservation({...newReservation, memo: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowNewReservationModal(false)}
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleCreateReservation}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                예약 생성
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
