@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
-import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
 
 interface MealInfo {
@@ -116,39 +115,53 @@ export default function MealListPage() {
     return `${timeString.substring(0, 2)}:${timeString.substring(2, 4)}`;
   };
 
-  // 엑셀 다운로드 함수
-  const handleExcelDownload = () => {
+  // CSV 다운로드 함수
+  const handleCSVDownload = () => {
     if (mealList.length === 0) {
       setError('다운로드할 데이터가 없습니다.');
       return;
     }
 
     try {
-      // 엑셀 데이터 준비 20250421 추가
-      const excelData = mealList.map(meal => ({
-        '방번호': meal.room_no,
-        '식사 날짜': formatDate(meal.meal_ymd),
-        '식사 코드': meal.meal_cd,
-        '식사 시간': formatTime(meal.meal_time),
-        '식사 인원': `${meal.eat_num}명`
-      }));
+      // CSV 헤더
+      const headers = ['방번호', '식사 날짜', '식사 코드', '식사 시간', '식사 인원'];
+      
+      // CSV 데이터 준비
+      const csvData = mealList.map(meal => [
+        meal.room_no,
+        formatDate(meal.meal_ymd),
+        meal.meal_cd,
+        formatTime(meal.meal_time),
+        `${meal.eat_num}명`
+      ]);
 
-      // 워크북 생성
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
+      // CSV 문자열 생성
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => row.join(','))
+      ].join('\n');
 
-      // 워크시트를 워크북에 추가
-      XLSX.utils.book_append_sheet(wb, ws, '식사 목록');
-
-      // 파일명 설정 (현재 날짜 포함)
-      const fileName = `식사목록_${searchDate.replace(/-/g, '')}.xlsx`;
-
-      // 엑셀 파일 다운로드
-      XLSX.writeFile(wb, fileName);
-      setSuccess('엑셀 파일이 다운로드되었습니다.');
+      // Blob 생성
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // 다운로드 링크 생성
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `식사목록_${searchDate.replace(/-/g, '')}.csv`);
+      document.body.appendChild(link);
+      
+      // 다운로드 실행
+      link.click();
+      
+      // 정리
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setSuccess('CSV 파일이 다운로드되었습니다.');
     } catch (err) {
-      console.error('Excel download error:', err);
-      setError('엑셀 다운로드 중 오류가 발생했습니다.');
+      console.error('CSV download error:', err);
+      setError('CSV 다운로드 중 오류가 발생했습니다.');
     }
   };
 
@@ -167,10 +180,10 @@ export default function MealListPage() {
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800">식사 확인 목록</h1>
             {mealList.length > 0 && (
               <button
-                onClick={handleExcelDownload}
+                onClick={handleCSVDownload}
                 className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               >
-                엑셀 다운로드
+                CSV 다운로드
               </button>
             )}
           </div>
