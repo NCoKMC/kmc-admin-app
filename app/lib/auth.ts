@@ -137,6 +137,23 @@ export function useAuth() {
       console.error('사용자 이름 가져오기 오류:', error);
     }
   };
+
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('비밀번호 변경 오류:', error);
+      throw error;
+    }
+  };
   
-  return { isAuthenticated, loading, user, userEmail, userName };
+  return { isAuthenticated, loading, user, userEmail, userName, updatePassword };
 } 

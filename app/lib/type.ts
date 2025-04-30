@@ -35,14 +35,16 @@ export interface Room {
     bipum_chk_yn: string;
     insp_chk_yn: string;
     use_yn: string;
+    check_in_ymd?: string;
+    check_out_ymd?: string;
   };
 
   // 방 상태 타입 정의
-export type RoomStatus =  'N' | 'C' | 'T' | 'G';
+export type RoomStatus =  'Z' | 'C' | 'T' | 'G';
 
 // 상태 코드 매핑
 export const roomStatusMap: Record<RoomStatus, string> = {  
-  'N': '청소중',
+  'Z': '청소중',
   'C': '청소완료',
   'T': '셋팅완료',
   'G': '점검완료'
@@ -50,7 +52,7 @@ export const roomStatusMap: Record<RoomStatus, string> = {
 
 // 상태별 색상 매핑
 export const roomStatusColors: Record<RoomStatus, string> = {
-    'N': 'bg-yellow-100 text-yellow-800',
+    'Z': 'bg-yellow-100 text-yellow-800',
     'C': 'bg-green-100 text-green-800',
     'T': 'bg-purple-100 text-purple-800',
     'G': 'bg-indigo-100 text-indigo-800'

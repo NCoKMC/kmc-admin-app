@@ -86,6 +86,7 @@ export default function RoomList() {
         .from('kmc_rooms')
         .select('room_no, org_cd, status_cd, clear_chk_yn, bipum_chk_yn, insp_chk_yn, use_yn')
         .eq('use_yn', 'Y')
+       // .order('status_cd', { ascending: false })
         .order('room_no', { ascending: true });
 
       if (error) {
@@ -118,8 +119,7 @@ export default function RoomList() {
 
       // 데이터 형식 변환
       const formattedRooms = data.map(room => {
-        const isOccupied = reservations?.some(reservation => reservation.room_no?.includes(room.room_no));
-        //console.log('isOccupied:', isOccupied);
+        const reservation = reservations?.find(reservation => reservation.room_no?.includes(room.room_no));
         return {
           room_no: room.room_no || '',
           org_cd: room.org_cd || '',
@@ -127,7 +127,8 @@ export default function RoomList() {
           clear_chk_yn: room.clear_chk_yn || 'N',
           bipum_chk_yn: room.bipum_chk_yn || 'N',        
           insp_chk_yn: room.insp_chk_yn || 'N',
-          use_yn: isOccupied ? 'Y' : 'N'
+          use_yn: reservation ? 'Y' : 'N',
+          check_in_ymd: reservation?.check_in_ymd || ''
         };
       });
 
@@ -220,7 +221,10 @@ export default function RoomList() {
                           </th>
                           <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
                             입실/퇴실
-                          </th>                          
+                          </th>
+                          <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                            입실일
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -237,7 +241,10 @@ export default function RoomList() {
                               </td>
                               <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
                                 {room.use_yn === 'Y' ? '입실' : '공실'}
-                              </td>                              
+                              </td>
+                              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
+                                {room.use_yn === 'Y' ? room.check_in_ymd : '-'}
+                              </td>
                             </tr>
                           ))
                         ) : (
