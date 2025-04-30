@@ -35,6 +35,7 @@ export default function Navigation() {
     { name: '식사 확인', path: '/meal-check' },
     { name: '식사 확인 목록', path: '/meal-list' },
     { name: '휴가신청', path: '/vacation' },
+    { name: '비밀번호 변경', path: '/change-password' },
   ];
 
   return (
