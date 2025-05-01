@@ -174,7 +174,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {cleaningRooms.length > 0 ? (
                           cleaningRooms.map((room, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
+                            <tr key={index} className="hover:bg-gray-50"  onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900">
                                 {room.room_no}
                               </td>
@@ -229,7 +229,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {incomingFriends.length > 0 ? (
                           incomingFriends.map((friend, index) => (
-                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50">
+                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50  cursor-pointer"  onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                                 <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
                                   friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 
@@ -239,7 +239,7 @@ export default function Dashboard() {
                                   {reservationStatusMap[friend.status_cd as ReservationStatus]}
                                 </span>
                               </td>
-                              <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
+                              <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900">{friend.user_nm}</td>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.room_no}</td>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.check_in_hhmm}</td>                        
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.guest_num}명</td>
@@ -284,7 +284,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {outgoingFriends.length > 0 ? (
                           outgoingFriends.map((friend, index) => (
-                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50">
+                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50 cursor-pointer"  onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                                 <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
                                   friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 
@@ -294,7 +294,7 @@ export default function Dashboard() {
                                   {reservationStatusMap[friend.status_cd as ReservationStatus]}
                                 </span>
                               </td>
-                              <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900 cursor-pointer" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>{friend.user_nm}</td>
+                              <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900">{friend.user_nm}</td>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.room_no}</td>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.check_out_hhmm}</td>                        
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs text-gray-500">{friend.guest_num}명</td>
