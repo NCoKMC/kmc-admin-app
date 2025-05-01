@@ -65,8 +65,8 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const formattedDate = format(date, 'yyyyMMdd');
-      const fiveDaysLater = format(new Date(date.setDate(date.getDate() + 5)), 'yyyyMMdd');
-
+      const fiveDaysLater = format(new Date(date.getTime() + 5 * 24 * 60 * 60 * 1000), 'yyyyMMdd');
+    
       // 청소해야 할 방 목록 가져오기
       const { data: cleaningData, error: cleaningError } = await supabase
         .from('kmc_rooms')

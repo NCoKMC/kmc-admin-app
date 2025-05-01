@@ -123,12 +123,14 @@ export default function RoomDetail() {
     try {
       setLoading(true);
       const kmc_cd = params.id as string;
-
+      console.log(kmc_cd);
       const { data, error } = await supabase
         .from('kmc_info')
         .select('*')
         .eq('kmc_cd', kmc_cd)          
         .in('status_cd', ['S', 'I','O'])
+        .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
         .single();
 
       if (error) throw error;
