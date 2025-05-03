@@ -145,6 +145,12 @@ export default function RoomList() {
     ? rooms 
     : rooms.filter(room => room.status_cd === selectedStatus);
 
+  // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
+  const checkInDate = (dateString: string) => {
+    if (dateString.length !== 8) return dateString;
+    return `${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`;
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
@@ -152,6 +158,7 @@ export default function RoomList() {
       </div>
     );
   }
+
 
   if (!isAuthenticated) {
     return null; // 리디렉션 중이므로 아무것도 렌더링하지 않음
@@ -244,7 +251,7 @@ export default function RoomList() {
                                 {room.use_yn === 'Y' ? '입실' : '공실'}
                               </td>
                               <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
-                                {room.use_yn === 'Y' ? room.check_in_ymd : '-'}
+                                {room.use_yn === 'Y' ?checkInDate(room.check_in_ymd||'') : '-'}
                               </td>
                             </tr>
                           ))

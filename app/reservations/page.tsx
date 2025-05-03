@@ -227,7 +227,7 @@ export default function Reservations() {
             ) : (
               <div className="overflow-x-auto">
                 <div className="max-h-[500px] overflow-y-auto">
-                  <table className="min-w-full">
+                  <table className="min-w-full divide-y divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50 z-10">
                       <tr className="bg-gray-50">
                         <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">상태</th>
@@ -239,11 +239,7 @@ export default function Reservations() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {reservations.map((reservation, index) => (
-                        <tr key={`${reservation.kmc_cd}-${index}`} className={`hover:bg-gray-50 font-medium cursor-pointer ${
-                          isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
-                            ? 'bg-yellow-100'
-                            : 'bg-green-50'
-                        }`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
+                        <tr key={`${reservation.kmc_cd}-${index}`} className={`hover:bg-gray-50 font-medium cursor-pointer`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
                           <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap w-auto">
                             <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
                               reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 
