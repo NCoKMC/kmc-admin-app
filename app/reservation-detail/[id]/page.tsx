@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation';
 import { supabase } from '../../lib/supabase';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../../lib/type';
+import { formatDateForDB } from '@/app/utils/dateUtils';
 // 타입 정의
 //interface Reservation {
   // kmc_cd: string;
@@ -129,8 +130,8 @@ export default function RoomDetail() {
         .select('*')
         .eq('kmc_cd', kmc_cd)          
         .in('status_cd', ['S', 'I','O'])
-        .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
-        .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .order('check_in_ymd', { ascending: false })
+        .limit(1)
         .single();
 
       if (error) throw error;

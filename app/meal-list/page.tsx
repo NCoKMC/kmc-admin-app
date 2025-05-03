@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
+import { formatDate } from '../utils/dateUtils';
 
 interface MealInfo {
   id: number;
@@ -48,7 +49,7 @@ export default function MealListPage() {
   // 오늘 날짜를 기본값으로 설정
   useEffect(() => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+    const formattedDate = formatDate(today);
     setSearchDate(formattedDate);
   }, []);
 
@@ -104,13 +105,13 @@ export default function MealListPage() {
   };
 
   // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
-  const formatDate = (dateString: string) => {
+  const mealDate = (dateString: string) => {
     if (dateString.length !== 8) return dateString;
     return `${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`;
   };
 
   // 시간 형식 변환 함수 (HHMM -> HH:MM)
-  const formatTime = (timeString: string) => {
+  const mealTime = (timeString: string) => {
     if (timeString.length !== 4) return timeString;
     return `${timeString.substring(0, 2)}:${timeString.substring(2, 4)}`;
   };
@@ -129,9 +130,9 @@ export default function MealListPage() {
       // CSV 데이터 준비
       const csvData = mealList.map(meal => [
         meal.room_no,
-        formatDate(meal.meal_ymd),
+        mealDate(meal.meal_ymd),
         meal.meal_cd,
-        formatTime(meal.meal_time),
+        mealTime(meal.meal_time),
         `${meal.eat_num}명`
       ]);
 
@@ -267,9 +268,9 @@ export default function MealListPage() {
                         onClick={() => handleRowClick(meal.room_no)}
                       >
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.room_no}</td>
-                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{mealDate(meal.meal_ymd)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.meal_cd}</td>
-                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatTime(meal.meal_time)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{mealTime(meal.meal_time)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.eat_num}명</td>                      
                       </tr>
                     ))}

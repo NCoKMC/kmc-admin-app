@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import Link from 'next/link';
+import { formatDateTime } from '../utils/dateUtils';
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,8 +53,8 @@ export default function SignUpPage() {
               name: name,
               adm_yn: 'N', // 기본적으로 관리자 권한 없음
               adm_grade: '0',  // 관리자 등급 없음              
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+              created_at: formatDateTime(new Date()),
+              updated_at: formatDateTime(new Date())
             }
           ]);
 

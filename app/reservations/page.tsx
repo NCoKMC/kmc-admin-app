@@ -9,6 +9,7 @@ import Router from 'next/router';
 import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
+import { formatDate } from '../utils/dateUtils';
 
 // 타입 정의
 //interface Reservation {
@@ -40,7 +41,7 @@ const generateKmcCd = () => {
 };
 
 export default function Reservations() {
-  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(formatDate(new Date()).slice(0, 7));
   const [selectedStatus, setSelectedStatus] = useState<string>('전체');
   const [reservations, setReservations] = useState<KmcInfo[]>([]);
   const [loading, setLoading] = useState(true);

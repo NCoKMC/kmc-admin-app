@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { RoomStatus, roomStatusMap, Room, roomStatusColors } from '../lib/type';
+import { formatDate } from '../utils/dateUtils';
 
 // 방 상태 타입 정의
 // type RoomStatus =  'N' | 'C' | 'T' | 'G';
@@ -95,7 +96,7 @@ export default function RoomList() {
       }
 
       // 예약 정보 가져오기
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDate(new Date());
       const { data: reservations, error: reservationError } = await supabase
         .from('kmc_info')
         .select('room_no, check_in_ymd, check_out_ymd')
