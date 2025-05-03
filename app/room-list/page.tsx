@@ -219,7 +219,7 @@ export default function RoomList() {
                 <div className="overflow-x-auto">
                   <div className="max-h-[500px] overflow-y-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0 z-10">
+                      <thead className="bg-gray-50 sticky top-0">
                         <tr>
                           <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
                             방번호

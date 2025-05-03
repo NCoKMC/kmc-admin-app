@@ -228,7 +228,7 @@ export default function Reservations() {
               <div className="overflow-x-auto">
                 <div className="max-h-[500px] overflow-y-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="sticky top-0 bg-gray-50 z-10">
+                    <thead className="sticky top-0 bg-gray-50">
                       <tr className="bg-gray-50">
                         <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">상태</th>
                         <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">예약자</th>                        

@@ -251,7 +251,7 @@ export default function MealListPage() {
             <div className="overflow-x-auto">
               <div className="max-h-[50vh] sm:max-h-[55vh] md:max-h-[60vh] lg:max-h-[65vh] overflow-y-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+                  <thead className="bg-gray-100 sticky top-0">
                     <tr>
                       <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">방번호</th>
                       <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 날짜</th>
