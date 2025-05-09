@@ -153,10 +153,10 @@ export default function MealListPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      setSuccess('CSV 파일이 다운로드되었습니다.');
+      setSuccess('엑셀셀 파일이 다운로드되었습니다.');
     } catch (err) {
       console.error('CSV download error:', err);
-      setError('CSV 다운로드 중 오류가 발생했습니다.');
+      setError('엑셀 다운로드 중 오류가 발생했습니다.');
     }
   };
 
@@ -178,7 +178,7 @@ export default function MealListPage() {
                 onClick={handleCSVDownload}
                 className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               >
-                CSV 다운로드
+                엑셀 다운로드
               </button>
             )}
           </div>
