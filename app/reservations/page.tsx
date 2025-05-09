@@ -9,6 +9,8 @@ import Router from 'next/router';
 import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
+import { formatDate } from '../utils/dateUtils';
+import { useAuth } from '../lib/auth';
 
 // 타입 정의
 //interface Reservation {
@@ -40,12 +42,13 @@ const generateKmcCd = () => {
 };
 
 export default function Reservations() {
-  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(formatDate(new Date()).slice(0, 7));
   const [selectedStatus, setSelectedStatus] = useState<string>('전체');
   const [reservations, setReservations] = useState<KmcInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [showNewReservationModal, setShowNewReservationModal] = useState(false);
+  const { userEmail } = useAuth();
   const [newReservation, setNewReservation] = useState({
     seq_no: 0,
     kmc_cd: '',
@@ -126,6 +129,11 @@ export default function Reservations() {
   // 신규 예약 생성
   const handleCreateReservation = async () => {
     try {
+      if (!userEmail) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
       // kmc_cd 생성
       const kmc_cd = generateKmcCd();
       // seq 생성 (YYYYmm 형식)
@@ -133,7 +141,9 @@ export default function Reservations() {
       const reservationData = {
         ...newReservation,
         kmc_cd,
-        seq_no
+        seq_no,
+        reg_date: new Date().toISOString(),
+        reg_id: userEmail
       };
       console.log(reservationData);
       const { data, error } = await supabase
@@ -226,8 +236,8 @@ export default function Reservations() {
             ) : (
               <div className="overflow-x-auto">
                 <div className="max-h-[500px] overflow-y-auto">
-                  <table className="min-w-full">
-                    <thead className="sticky top-0 bg-gray-50 z-10">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="sticky top-0 bg-gray-50">
                       <tr className="bg-gray-50">
                         <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">상태</th>
                         <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">예약자</th>                        
@@ -238,11 +248,7 @@ export default function Reservations() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {reservations.map((reservation, index) => (
-                        <tr key={`${reservation.kmc_cd}-${index}`} className={`hover:bg-gray-50 font-medium cursor-pointer ${
-                          isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
-                            ? 'bg-yellow-100'
-                            : 'bg-green-50'
-                        }`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
+                        <tr key={`${reservation.kmc_cd}-${index}`} className={`hover:bg-gray-50 font-medium cursor-pointer`} onClick={() => router.push(`/reservation-detail/${reservation.kmc_cd}`)}>
                           <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap w-auto">
                             <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
                               reservation.status_cd === 'S' ? 'bg-green-100 text-green-800' : 

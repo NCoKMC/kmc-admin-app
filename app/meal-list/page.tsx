@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
-import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
+import { formatDate } from '../utils/dateUtils';
 
 interface MealInfo {
   id: number;
@@ -49,7 +49,7 @@ export default function MealListPage() {
   // 오늘 날짜를 기본값으로 설정
   useEffect(() => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+    const formattedDate = formatDate(today);
     setSearchDate(formattedDate);
   }, []);
 
@@ -72,7 +72,9 @@ export default function MealListPage() {
       let query = supabase
         .from('kmc_meal_mgmt')
         .select('*')
-        .eq('meal_ymd', formattedDate);
+        .eq('meal_ymd', formattedDate)
+        .order('meal_ymd', { ascending: false })
+        .order('meal_time', { ascending: true });
       
       // 방번호가 입력된 경우 방번호 조건 추가
       if (searchRoomNo) {
@@ -80,22 +82,14 @@ export default function MealListPage() {
       }
       
       // 쿼리 실행
-      const { data, error } = await query.order('meal_ymd', { ascending: false });
+      const { data, error } = await query;
 
-      if (error) {
-        console.error('Error fetching meal data:', error);
-        setError(`데이터 조회 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
-        return;
-      }
+      if (error) throw error;
 
-      if (!data || data.length === 0) {
-        setSuccess('조회된 식사 정보가 없습니다.');
-        setMealList([]);
-        return;
-      }
-
-      setMealList(data);
-      setSuccess(`${data.length}건의 식사 정보가 조회되었습니다.`);
+      // 인원 합계 계산
+      const totalGuests = data.reduce((sum, meal) => sum + (parseInt(meal.eat_num) || 0), 0);
+      setMealList(data || []);
+      setSuccess(`${data.length}건의 식사 정보가 조회되었습니다. (총 ${totalGuests}명)`);
     } catch (err) {
       console.error('Exception details:', err);
       setError(`오류가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
@@ -105,50 +99,64 @@ export default function MealListPage() {
   };
 
   // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
-  const formatDate = (dateString: string) => {
+  const mealDate = (dateString: string) => {
     if (dateString.length !== 8) return dateString;
     return `${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`;
   };
 
   // 시간 형식 변환 함수 (HHMM -> HH:MM)
-  const formatTime = (timeString: string) => {
+  const mealTime = (timeString: string) => {
     if (timeString.length !== 4) return timeString;
     return `${timeString.substring(0, 2)}:${timeString.substring(2, 4)}`;
   };
 
-  // 엑셀 다운로드 함수
-  const handleExcelDownload = () => {
+  // CSV 다운로드 함수
+  const handleCSVDownload = () => {
     if (mealList.length === 0) {
       setError('다운로드할 데이터가 없습니다.');
       return;
     }
 
     try {
-      // 엑셀 데이터 준비 20250421 추가
-      const excelData = mealList.map(meal => ({
-        '방번호': meal.room_no,
-        '식사 날짜': formatDate(meal.meal_ymd),
-        '식사 코드': meal.meal_cd,
-        '식사 시간': formatTime(meal.meal_time),
-        '식사 인원': `${meal.eat_num}명`
-      }));
+      // CSV 헤더
+      const headers = ['방번호', '식사 날짜', '식사 코드', '식사 시간', '식사 인원'];
+      
+      // CSV 데이터 준비
+      const csvData = mealList.map(meal => [
+        meal.room_no,
+        mealDate(meal.meal_ymd),
+        meal.meal_cd,
+        mealTime(meal.meal_time),
+        `${meal.eat_num}`
+      ]);
 
-      // 워크북 생성
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
+      // CSV 문자열 생성
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => row.join(','))
+      ].join('\n');
 
-      // 워크시트를 워크북에 추가
-      XLSX.utils.book_append_sheet(wb, ws, '식사 목록');
-
-      // 파일명 설정 (현재 날짜 포함)
-      const fileName = `식사목록_${searchDate.replace(/-/g, '')}.xlsx`;
-
-      // 엑셀 파일 다운로드
-      XLSX.writeFile(wb, fileName);
-      setSuccess('엑셀 파일이 다운로드되었습니다.');
+      // Blob 생성
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // 다운로드 링크 생성
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `식사목록_${searchDate.replace(/-/g, '')}.csv`);
+      document.body.appendChild(link);
+      
+      // 다운로드 실행
+      link.click();
+      
+      // 정리
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setSuccess('CSV 파일이 다운로드되었습니다.');
     } catch (err) {
-      console.error('Excel download error:', err);
-      setError('엑셀 다운로드 중 오류가 발생했습니다.');
+      console.error('CSV download error:', err);
+      setError('CSV 다운로드 중 오류가 발생했습니다.');
     }
   };
 
@@ -167,10 +175,10 @@ export default function MealListPage() {
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800">식사 확인 목록</h1>
             {mealList.length > 0 && (
               <button
-                onClick={handleExcelDownload}
+                onClick={handleCSVDownload}
                 className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               >
-                엑셀 다운로드
+                CSV 다운로드
               </button>
             )}
           </div>
@@ -237,7 +245,7 @@ export default function MealListPage() {
             <div className="overflow-x-auto">
               <div className="max-h-[50vh] sm:max-h-[55vh] md:max-h-[60vh] lg:max-h-[65vh] overflow-y-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+                  <thead className="bg-gray-100 sticky top-0">
                     <tr>
                       <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">방번호</th>
                       <th className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left text-xs sm:text-sm font-semibold text-gray-600">식사 날짜</th>
@@ -254,9 +262,9 @@ export default function MealListPage() {
                         onClick={() => handleRowClick(meal.room_no)}
                       >
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.room_no}</td>
-                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatDate(meal.meal_ymd)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{mealDate(meal.meal_ymd)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.meal_cd}</td>
-                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{formatTime(meal.meal_time)}</td>
+                        <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{mealTime(meal.meal_time)}</td>
                         <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700">{meal.eat_num}명</td>                      
                       </tr>
                     ))}

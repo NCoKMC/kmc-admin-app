@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { formatDate, formatDateForDB } from '../utils/dateUtils';
 
 interface RoomDetail {
   room_no: string;
@@ -124,7 +125,7 @@ function RoomDetailContent() {
       }
       
       // 현재 날짜 (YYYY-MM-DD 형식)
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDateForDB(new Date()); 
       
       console.log('체크박스 상태:', checkboxStates);
       console.log('방 번호:', roomNo);
@@ -195,12 +196,12 @@ function RoomDetailContent() {
         .from('kmc_info')
         .select('seq_no, user_nm, guest_num, check_in_ymd, check_out_ymd, kmc_cd')        
         .like('room_no', '%' + roomNo + '%')
-        .lte('check_in_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
-        .gte('check_out_ymd', new Date().toISOString().split('T')[0].replace(/-/g, ''))
+        .lte('check_in_ymd', formatDateForDB(new Date()))
+        .gte('check_out_ymd', formatDateForDB(new Date()))
         .in('status_cd', ['I', 'S'])
         .single();
       
-        console.log(new Date().toISOString().split('T')[0].replace(/-/g, ''));
+        console.log(formatDateForDB(new Date()));
         console.log(roomNo);
       if (userError) {
         console.error('Error fetching user data:', userError);

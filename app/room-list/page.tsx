@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { RoomStatus, roomStatusMap, Room, roomStatusColors } from '../lib/type';
+import { formatDate } from '../utils/dateUtils';
+import { format } from 'date-fns';
 
 // 방 상태 타입 정의
 // type RoomStatus =  'N' | 'C' | 'T' | 'G';
@@ -95,7 +97,7 @@ export default function RoomList() {
       }
 
       // 예약 정보 가져오기
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDate(new Date());
       const { data: reservations, error: reservationError } = await supabase
         .from('kmc_info')
         .select('room_no, check_in_ymd, check_out_ymd')
@@ -144,6 +146,12 @@ export default function RoomList() {
     ? rooms 
     : rooms.filter(room => room.status_cd === selectedStatus);
 
+  // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
+  const checkInDate = (dateString: string) => {
+    if (dateString.length !== 8) return dateString;
+    return `${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`;
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#1e3a8a] flex items-center justify-center">
@@ -151,6 +159,7 @@ export default function RoomList() {
       </div>
     );
   }
+
 
   if (!isAuthenticated) {
     return null; // 리디렉션 중이므로 아무것도 렌더링하지 않음
@@ -211,7 +220,7 @@ export default function RoomList() {
                 <div className="overflow-x-auto">
                   <div className="max-h-[500px] overflow-y-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0 z-10">
+                      <thead className="bg-gray-50 sticky top-0">
                         <tr>
                           <th className="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider w-1/5">
                             방번호
@@ -243,7 +252,7 @@ export default function RoomList() {
                                 {room.use_yn === 'Y' ? '입실' : '공실'}
                               </td>
                               <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
-                                {room.use_yn === 'Y' ? room.check_in_ymd : '-'}
+                                {room.use_yn === 'Y' ? checkInDate(room.check_in_ymd || '') : '-'}
                               </td>
                             </tr>
                           ))

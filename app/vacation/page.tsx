@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 
 interface VacationRequest {
   req_no: number;
@@ -170,11 +171,11 @@ export default function VacationPage() {
           .from('kmc_guentae_mgmt')
           .select('start_date')
           .eq('email', user.email)
-          .eq('start_date', d.toISOString().split('T')[0])
+          .eq('start_date', formatDate(d))
           .eq('status_cd', 'VC');
 
         if (existingData && existingData.length > 0) {
-          existingDates.push(d.toISOString().split('T')[0]);
+          existingDates.push(formatDate(d));
         }
       }
 
@@ -226,8 +227,8 @@ export default function VacationPage() {
           dateArray.push({
             email: user.email,
             seq: 1,
-            start_date: d.toISOString().split('T')[0],
-            end_date: d.toISOString().split('T')[0],
+            start_date: formatDate(d),
+            end_date: formatDate(d),
             status_cd: 'VC',
             req_no: req_no,
             pto_cd: pto_cd
@@ -264,7 +265,7 @@ export default function VacationPage() {
           .from('kmc_requests')
           .insert([
             {
-              req_date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+              req_date: formatDateTime(new Date()),
               req_cd: 'VC',
               req_desc: memo,
               req_email: user.email,
@@ -284,8 +285,8 @@ export default function VacationPage() {
           dateArray.push({
             email: user.email,
             seq: 1,
-            start_date: d.toISOString().split('T')[0],
-            end_date: d.toISOString().split('T')[0],
+            start_date: formatDate(d),
+            end_date: formatDate(d),
             status_cd: 'VC',
             req_no: req_no,
             pto_cd: pto_cd

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { formatDate, formatDateForDB, formatDateTime } from '../utils/dateUtils';
 
 interface VisitorInfo {
   user_nm: string;
@@ -12,7 +13,7 @@ interface VisitorInfo {
 
 export default function MealCheckPage() {
   const [roomNumber, setRoomNumber] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => formatDate(new Date()));
   const [visitorInfo, setVisitorInfo] = useState<VisitorInfo | null>(null);
   const [manualInput, setManualInput] = useState(false);
   const [manualName, setManualName] = useState('');
@@ -174,8 +175,8 @@ export default function MealCheckPage() {
 
       // 현재 날짜와 시간 가져오기
       const now = new Date();
-      const today = now.toISOString().split('T')[0].replace(/-/g, '');
-      const currentDate = now.toISOString();
+      const today = formatDateForDB(now);
+      const currentDate = formatDateTime(now);
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
       const currentTime = `${String(currentHour).padStart(2, '0')}${String(currentMinute).padStart(2, '0')}`;
