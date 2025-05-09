@@ -39,6 +39,7 @@ import { formatDate } from '../utils/dateUtils';
 
 export default function RoomList() {
   const [selectedStatus, setSelectedStatus] = useState<RoomStatus | '전체'>('전체');
+  const [selectedUseStatus, setSelectedUseStatus] = useState<'전체' | '입실' | '공실'>('전체');
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -141,9 +142,14 @@ export default function RoomList() {
     }
   };
 
-  const filteredRooms = selectedStatus === '전체' 
-    ? rooms 
-    : rooms.filter(room => room.status_cd === selectedStatus);
+  const filteredRooms = rooms
+    .filter(room => selectedStatus === '전체' || room.status_cd === selectedStatus)
+    .filter(room => {
+      if (selectedUseStatus === '전체') return true;
+      if (selectedUseStatus === '입실') return room.use_yn === 'Y';
+      if (selectedUseStatus === '공실') return room.use_yn === 'N';
+      return true;
+    });
 
   // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
   const checkInDate = (dateString: string) => {
@@ -206,6 +212,23 @@ export default function RoomList() {
                       }`}
                     >
                       {roomStatusMap[status as RoomStatus]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 입실/퇴실 필터 */}
+                <div className="mt-2 sm:mt-3 md:mt-4 flex flex-wrap gap-2">
+                  {['전체', '입실', '공실'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setSelectedUseStatus(status as '전체' | '입실' | '공실')}
+                      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm sm:text-base font-medium ${
+                        selectedUseStatus === status 
+                          ? 'bg-blue-500 text-white' 
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {status}
                     </button>
                   ))}
                 </div>
