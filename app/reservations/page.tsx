@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
 import { formatDate } from '../utils/dateUtils';
+import { useAuth } from '../lib/auth';
 
 // 타입 정의
 //interface Reservation {
@@ -47,6 +48,7 @@ export default function Reservations() {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [showNewReservationModal, setShowNewReservationModal] = useState(false);
+  const { userEmail } = useAuth();
   const [newReservation, setNewReservation] = useState({
     seq_no: 0,
     kmc_cd: '',
@@ -127,6 +129,11 @@ export default function Reservations() {
   // 신규 예약 생성
   const handleCreateReservation = async () => {
     try {
+      if (!userEmail) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
       // kmc_cd 생성
       const kmc_cd = generateKmcCd();
       // seq 생성 (YYYYmm 형식)
@@ -134,7 +141,9 @@ export default function Reservations() {
       const reservationData = {
         ...newReservation,
         kmc_cd,
-        seq_no
+        seq_no,
+        reg_date: new Date().toISOString(),
+        reg_id: userEmail
       };
       console.log(reservationData);
       const { data, error } = await supabase

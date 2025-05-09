@@ -5,6 +5,7 @@ import Navigation from '../../components/Navigation';
 import { supabase } from '../../lib/supabase';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../../lib/type';
 import { formatDateForDB } from '@/app/utils/dateUtils';
+import { useAuth } from '../../lib/auth';
 // 타입 정의
 //interface Reservation {
   // kmc_cd: string;
@@ -35,6 +36,7 @@ import { formatDateForDB } from '@/app/utils/dateUtils';
 export default function RoomDetail() {
   const params = useParams();
   const router = useRouter();
+  const { userEmail } = useAuth();
   const [reservation, setReservation] = useState<KmcInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [memo, setMemo] = useState('');
@@ -168,6 +170,11 @@ export default function RoomDetail() {
       setInfoError('');
       setInfoSuccess('');
       
+      if (!userEmail) {
+        setMemoError('로그인이 필요합니다.');
+        return;
+      }
+      
       const { error } = await supabase
         .from('kmc_info')
         .update({
@@ -181,7 +188,9 @@ export default function RoomDetail() {
           user_nm: editingInfo.user_nm,
           phone_num: editingInfo.phone_num,
           location_nm: editingInfo.location_nm,
-          group_desc: editingInfo.group_desc
+          group_desc: editingInfo.group_desc,
+          upd_date: new Date().toISOString(),
+          upd_id: userEmail
         })
         .eq('kmc_cd', reservation.kmc_cd)
         .eq('seq_no', reservation.seq_no);
@@ -236,21 +245,6 @@ export default function RoomDetail() {
       }
       console.log('저장할 newStatus:', newStatus);
       console.log('저장할 데이터:', reservation);
-
-      // 현재 로그인한 사용자의 이메일 가져오기
-      // const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      // if (userError) {
-      //   console.error('Error getting user:', userError);
-      //   alert('사용자 정보를 가져오는 중 오류가 발생했습니다.');
-      //   return;
-      // }
-      
-      // if (!user || !user.email) {
-      //   alert('로그인이 필요합니다.');
-      //   return;
-      // }
-      
 
       const { error } = await supabase
         .from('kmc_info')

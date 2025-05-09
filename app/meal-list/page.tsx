@@ -72,7 +72,9 @@ export default function MealListPage() {
       let query = supabase
         .from('kmc_meal_mgmt')
         .select('*')
-        .eq('meal_ymd', formattedDate);
+        .eq('meal_ymd', formattedDate)
+        .order('meal_ymd', { ascending: false })
+        .order('meal_time', { ascending: true });
       
       // 방번호가 입력된 경우 방번호 조건 추가
       if (searchRoomNo) {
@@ -80,22 +82,14 @@ export default function MealListPage() {
       }
       
       // 쿼리 실행
-      const { data, error } = await query.order('meal_ymd', { ascending: false });
+      const { data, error } = await query;
 
-      if (error) {
-        console.error('Error fetching meal data:', error);
-        setError(`데이터 조회 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
-        return;
-      }
+      if (error) throw error;
 
-      if (!data || data.length === 0) {
-        setSuccess('조회된 식사 정보가 없습니다.');
-        setMealList([]);
-        return;
-      }
-
-      setMealList(data);
-      setSuccess(`${data.length}건의 식사 정보가 조회되었습니다.`);
+      // 인원 합계 계산
+      const totalGuests = data.reduce((sum, meal) => sum + (parseInt(meal.eat_num) || 0), 0);
+      setMealList(data || []);
+      setSuccess(`${data.length}건의 식사 정보가 조회되었습니다. (총 ${totalGuests}명)`);
     } catch (err) {
       console.error('Exception details:', err);
       setError(`오류가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
@@ -133,7 +127,7 @@ export default function MealListPage() {
         mealDate(meal.meal_ymd),
         meal.meal_cd,
         mealTime(meal.meal_time),
-        `${meal.eat_num}명`
+        `${meal.eat_num}`
       ]);
 
       // CSV 문자열 생성
