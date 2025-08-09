@@ -611,12 +611,12 @@ export default function Reservations() {
                 onChange={handleExcelUpload}
                 style={{ display: 'none' }}
               />
-              <button
+              {/* <button
                 onClick={handleDownloadTemplate}
                 className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors w-full"
               >
                 템플릿 다운로드
-              </button>
+              </button> */}
               <button
                 onClick={handleCloseExcelModal}
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors w-full"
