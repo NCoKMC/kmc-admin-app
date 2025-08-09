@@ -1,38 +1,220 @@
-# KMC Admin App
+# 새중앙선교센터 관리자 시스템
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+새중앙선교센터의 예약 및 시설 관리를 위한 웹 기반 관리자 시스템입니다.
 
-## Getting Started
+## 📖 시스템 개요
 
-First, run the development server:
+이 시스템은 선교센터의 예약 관리, 객실 관리, 식사 관리 등을 효율적으로 처리할 수 있는 통합 관리 솔루션입니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 기술 스택
+
+- **Frontend**: Next.js 15.2.4, React 19, TypeScript
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS
+- **Date Handling**: date-fns
+- **Excel Processing**: xlsx
+- **UI Components**: React DatePicker, Heroicons
+
+## 📱 주요 기능
+
+### 1. 🔐 로그인 시스템 (`/login`)
+- **이메일/비밀번호 기반 인증**
+- **관리자 권한 검증**: `kmc_adms` 테이블에서 관리자 권한(`adm_yn = 'Y'`) 확인
+- **중복 로그인 방지**: 다른 기기에서 로그인 시 기존 세션 자동 로그아웃
+- **로그인 정보 저장**: "로그인 상태 유지" 옵션 제공
+- **반응형 디자인**: 모바일 최적화된 로그인 화면
+
+### 2. 📊 대시보드 (`/dashboard`)
+- **오늘의 체크인/체크아웃 현황**
+  - 선택한 날짜의 입실 예정자 목록
+  - 퇴실 예정자 목록
+  - 실시간 현황 업데이트
+- **객실 청소 현황**
+  - 청소 상태별 객실 분류 (청소중, 청소완료, 셋팅완료, 점검완료)
+  - 색상별 상태 표시
+- **날짜 선택**: 특정 날짜의 현황 조회 가능
+- **모바일 반응형**: 작은 화면에서도 최적화된 레이아웃
+
+### 3. 📝 예약 관리 (`/reservations`)
+- **예약 목록 조회**
+  - 년월별 예약 데이터 필터링
+  - 상태별 필터링 (전체/예약/입실/퇴실)
+  - 실시간 상태 표시 및 색상 구분
+  - 오늘 체크아웃 하이라이트 기능
+
+- **신규 예약 생성**
+  - 모달 기반 예약 등록 폼
+  - 자동 예약코드(kmc_cd) 생성
+  - 체크인/아웃 날짜 및 시간 설정
+  - 예약자 정보, 객실, 인원, 연락처 등 상세 정보 입력
+
+- **📊 엑셀 업로드 기능** (신규)
+  - **권한 기반 접근**: 업로드 권한이 있는 사용자만 사용 가능
+  - **모달 UI**: 깔끔한 모달 인터페이스
+  - **파일 검증**: 엑셀 파일의 컬럼 구조 자동 검증
+  - **템플릿 다운로드**: 정확한 양식의 엑셀 템플릿 제공
+  - **배치 처리**: 대량 예약 데이터 일괄 업로드
+  - **데이터 변환**: 상태코드 자동 변환, 날짜 형식 표준화
+
+### 4. 🏠 객실 관리 (`/room-list`, `/room-detail`)
+- **객실 목록 조회**
+  - 전체 객실 상태 한눈에 보기
+  - 상태별 색상 구분 (청소중, 청소완료, 셋팅완료, 점검완료)
+  - 객실별 예약 정보 연동
+
+- **객실 상세 관리**
+  - 개별 객실 상태 변경
+  - 청소 완료, 비품 체크, 점검 완료 등 체크리스트
+  - 객실별 예약 히스토리
+
+### 5. 🍽️ 식사 관리 (`/meal-check`, `/meal-list`)
+- **식사 체크 시스템**
+  - 객실 번호 기반 빠른 검색
+  - 숫자 패드 UI로 편리한 입력
+  - 투숙객 정보 자동 조회
+  - 수동 입력 모드 지원
+  - 식사 인원 조정 기능
+
+- **식사 현황 목록**
+  - 날짜별 식사 신청 현황
+  - 총 식사 인원 집계
+  - 객실별 식사 정보 관리
+
+### 6. 🏖️ 휴가 관리 (`/vacation`)
+- 직원 휴가 신청 및 관리 시스템
+- 휴가 일정 조회 및 승인 프로세스
+
+### 7. ⚙️ 시스템 설정
+- **비밀번호 변경** (`/change-password`)
+  - 현재 비밀번호 확인
+  - 새 비밀번호 설정 및 확인
+  - 보안 강화된 비밀번호 변경
+
+- **사용자 설정** (`/settings`) - 준비중
+- **로그아웃** (`/logout`): 안전한 세션 종료
+
+## 🎨 UI/UX 특징
+
+### 반응형 디자인
+- **모바일 우선**: 스마트폰, 태블릿에서 최적화된 사용성
+- **터치 친화적**: 큰 버튼, 적절한 간격으로 터치 조작 편의성
+- **화면 크기별 최적화**: 갤럭시 울트라 등 다양한 화면 크기 지원
+
+### 직관적 네비게이션
+- **드롭다운 메뉴**: 모든 기능에 빠르게 접근
+- **현재 페이지 하이라이트**: 사용자가 현재 위치를 쉽게 파악
+- **사용자 정보 표시**: 로그인한 사용자 이름 표시
+
+### 시각적 피드백
+- **상태별 색상 구분**: 예약 상태, 객실 상태를 색상으로 직관적 표시
+- **로딩 상태**: 데이터 처리 중 로딩 인디케이터
+- **성공/오류 메시지**: 작업 결과에 대한 명확한 피드백
+
+## 📂 프로젝트 구조
+
+```
+kmc-admin-app/
+├── app/
+│   ├── components/
+│   │   └── Navigation.tsx          # 공통 네비게이션 컴포넌트
+│   ├── lib/
+│   │   ├── auth.ts                 # 인증 관련 유틸리티
+│   │   ├── supabase.ts            # Supabase 클라이언트 설정
+│   │   └── type.ts                # TypeScript 타입 정의
+│   ├── utils/
+│   │   └── dateUtils.ts           # 날짜 처리 유틸리티
+│   ├── login/page.tsx             # 로그인 페이지
+│   ├── dashboard/page.tsx         # 대시보드
+│   ├── reservations/page.tsx      # 예약 관리
+│   ├── room-list/page.tsx         # 객실 목록
+│   ├── room-detail/page.tsx       # 객실 상세
+│   ├── meal-check/page.tsx        # 식사 체크
+│   ├── meal-list/page.tsx         # 식사 목록
+│   ├── vacation/page.tsx          # 휴가 관리
+│   ├── change-password/page.tsx   # 비밀번호 변경
+│   ├── settings/page.tsx          # 설정 (준비중)
+│   └── logout/page.tsx            # 로그아웃
+├── public/
+│   └── images/
+│       └── saejungang-logo.png    # 로고 이미지
+├── package.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ 설치 및 실행
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 필수 요구사항
+- Node.js 18.0 이상
+- npm 또는 yarn
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 환경 설정
+1. 환경 변수 파일 생성 (`.env.local`)
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-## Learn More
+### 설치 및 실행
+```bash
+# 의존성 설치
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# 개발 서버 실행
+npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 프로덕션 빌드
+npm run build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 프로덕션 서버 실행
+npm start
+```
 
-## Deploy on Vercel
+## 📊 데이터베이스 구조
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 주요 테이블
+- **`kmc_info`**: 예약 정보 메인 테이블
+- **`kmc_info_tmp`**: 엑셀 업로드용 임시 테이블
+- **`kmc_adms`**: 관리자 계정 정보
+- **`room_status`**: 객실 상태 관리
+- **`meal_check`**: 식사 체크 기록
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔒 보안 및 권한
+
+### 인증 시스템
+- Supabase Auth 기반 이메일/비밀번호 인증
+- 관리자 권한 검증 (`adm_yn = 'Y'`)
+- 세션 기반 상태 관리
+
+### 권한 관리
+- 페이지별 접근 권한 제어
+- 기능별 권한 분리 (예: 엑셀 업로드 권한)
+- 안전한 로그아웃 및 세션 관리
+
+## 🌟 주요 개선사항
+
+### 엑셀 업로드 시스템
+- ✅ 권한 기반 접근 제어
+- ✅ 파일 구조 검증
+- ✅ 대량 데이터 처리 최적화
+- ✅ 사용자 친화적 모달 UI
+- ✅ 템플릿 다운로드 기능
+
+### 모바일 최적화
+- ✅ 반응형 레이아웃
+- ✅ 터치 최적화 UI
+- ✅ 다양한 화면 크기 지원
+
+### 사용자 경험 개선
+- ✅ 직관적인 상태 표시
+- ✅ 실시간 데이터 업데이트
+- ✅ 명확한 피드백 시스템
+
+## 📞 지원 및 문의
+
+시스템 사용 중 문제가 발생하거나 개선사항이 있으시면 시스템 관리자에게 문의해 주세요.
+
+---
+
+**새중앙선교센터 관리자 시스템 v1.0**  
+*효율적인 선교센터 운영을 위한 통합 관리 솔루션*

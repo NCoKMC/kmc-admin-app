@@ -257,19 +257,25 @@ export default function Reservations() {
       const workbook = XLSX.read(new Uint8Array(data as ArrayBuffer), { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
       const header = json[0] as string[];
       // console.log('엑셀 헤더:', header);
-      const requiredColumns = [
-        'seq_no', 'kmc_cd', 'user_nm', 'spouse_nm', 'dispatch_agency_nm', 'dispatch_dmn_nm', 'dispatch_church_nm', 'location_nm', 'dispatch_agency_phone_1_num', 'user_email', 'check_in_ymd', 'check_in_hhmm', 'check_out_ymd', 'check_out_hhmm', 'guest_num', 'group_desc', 'phone_num', 'hc', 'ot', 'proof_doc_yn', 'room_no', 'status_cd', 'status_nm', 'memo', 'reg_date', 'reg_id', 'upd_date', 'upd_id'
+      const orgColumns = [
+        'No.',	'코드',	'성명',	'배우자',	'파송기관단체',	'파송기관교단',	'파송기관교회',	'파송국가',	'연락처',	'이메일',	'입실일',	'입실시간',	'퇴실일',	'퇴실시간',	'입실인원',	'가족사항',	'연락처',	'힐링센터',	'OT',	'증빙서류',	'객실선택',	'상태'
       ];
-      const isValid = header && header.length === requiredColumns.length && header.every((col, idx) => col === requiredColumns[idx]);
+      
+      const requiredColumns = [
+        'seq_no', 'kmc_cd', 'user_nm', 'spouse_nm', 'dispatch_agency_nm', 'dispatch_dmn_nm', 'dispatch_church_nm', 'location_nm', 'dispatch_agency_phone_1_num', 'user_email', 'check_in_ymd', 'check_in_hhmm', 'check_out_ymd', 'check_out_hhmm', 'guest_num', 'group_desc', 'phone_num', 'hc', 'ot', 'proof_doc_yn', 'room_no', 'status_cd'
+      ];
+      
+      const isValid = header && header.length === orgColumns.length && header.every((col, idx) => col === orgColumns[idx]);
       if (!isValid) {
-        alert('엑셀 컬럼이 형식과 일치하지 않습니다.\n\n필수 컬럼:\n' + requiredColumns.join(', '));
+        alert('엑셀 컬럼이 형식과 일치하지 않습니다.\n\n필수 컬럼:\n' + orgColumns.join(', '));
+        setShowExcelModal(false);
         return;
       }
       
-      // 1. 엑셀 데이터 rows 추출
+      // 1. 엑셀 데이터 rows 추출 (orgColumns 인덱스로 읽어서 requiredColumns 컬럼명으로 저장)
       const rows = json.slice(1).map((row, i) => {
         const arr = row as any[];
         const obj: any = {};
@@ -281,7 +287,7 @@ export default function Reservations() {
 
       const rowCnt = rows.length;
       // console.log('엑셀 데이터 rowCnt:', rowCnt);
-      // console.log('엑셀 데이터 rows:', rows);
+      console.log('엑셀 데이터 rows:', rows);
       
       if (rowCnt > 0) {
           
@@ -317,13 +323,17 @@ export default function Reservations() {
       
         if (error) {
           console.error('에러 발생:', error.message);
+          alert('업로드 중 오류가 발생했습니다: ' + error.message);
+          setShowExcelModal(false);
         } else {
           console.log('호출 성공:', data);
         }
 
         alert(`업로드 완료! 총 ${rowCnt}건이 처리되었습니다.`);
+        setShowExcelModal(false);
       } else {
         alert('엑셀 파일에 데이터가 없습니다.');
+        setShowExcelModal(false);
       }
     };
     // console.log('엑셀 업로드 시작4');
