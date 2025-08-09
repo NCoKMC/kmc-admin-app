@@ -66,7 +66,7 @@ export default function Dashboard() {
       setLoading(true);
       const formattedDate = format(date, 'yyyyMMdd');
       const fiveDaysLater = format(new Date(date.getTime() + 5 * 24 * 60 * 60 * 1000), 'yyyyMMdd');
-    
+
       // 청소해야 할 방 목록 가져오기
       const { data: cleaningData, error: cleaningError } = await supabase
         .from('kmc_rooms')
@@ -174,7 +174,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {cleaningRooms.length > 0 ? (
                           cleaningRooms.map((room, index) => (
-                            <tr key={index} className="hover:bg-gray-50"  onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
+                            <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/room-detail?roomNo=${room.room_no}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap text-xs font-medium text-gray-900">
                                 {room.room_no}
                               </td>
@@ -229,7 +229,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {incomingFriends.length > 0 ? (
                           incomingFriends.map((friend, index) => (
-                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50  cursor-pointer"  onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
+                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                                 <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
                                   friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 
@@ -284,7 +284,7 @@ export default function Dashboard() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {outgoingFriends.length > 0 ? (
                           outgoingFriends.map((friend, index) => (
-                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50 cursor-pointer"  onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
+                            <tr key={`${friend.kmc_cd}-${index}`} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/reservation-detail/${friend.kmc_cd}`)}>
                               <td className="px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                                 <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
                                   friend.status_cd === 'S' ? 'bg-green-100 text-green-800' 

@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { RoomStatus, roomStatusMap, Room, roomStatusColors } from '../lib/type';
 import { formatDate } from '../utils/dateUtils';
+import { format } from 'date-fns';
 
 // 방 상태 타입 정의
 // type RoomStatus =  'N' | 'C' | 'T' | 'G';
@@ -274,7 +275,7 @@ export default function RoomList() {
                                 {room.use_yn === 'Y' ? '입실' : '공실'}
                               </td>
                               <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
-                                {room.use_yn === 'Y' ?checkInDate(room.check_in_ymd||'') : '-'}
+                                {room.use_yn === 'Y' ? checkInDate(room.check_in_ymd || '') : '-'}
                               </td>
                             </tr>
                           ))
