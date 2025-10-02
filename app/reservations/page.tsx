@@ -287,7 +287,7 @@ export default function Reservations() {
 
       const rowCnt = rows.length;
       // console.log('엑셀 데이터 rowCnt:', rowCnt);
-      console.log('엑셀 데이터 rows:', rows);
+      // console.log('엑셀 데이터 rows:', rows);
       
       if (rowCnt > 0) {
           
