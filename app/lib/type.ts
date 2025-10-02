@@ -40,14 +40,15 @@ export interface Room {
   };
 
   // 방 상태 타입 정의
-export type RoomStatus =  'Z' | 'C' | 'T' | 'G';
+export type RoomStatus =  'Z' | 'C' | 'T' | 'G' | 'E';
 
 // 상태 코드 매핑
 export const roomStatusMap: Record<RoomStatus, string> = {  
   'Z': '청소중',
   'C': '청소완료',
   'T': '셋팅완료',
-  'G': '점검완료'
+  'G': '점검완료',
+  'E': '수리중'
 };
 
 // 상태별 색상 매핑
@@ -55,7 +56,8 @@ export const roomStatusColors: Record<RoomStatus, string> = {
     'Z': 'bg-yellow-100 text-yellow-800',
     'C': 'bg-green-100 text-green-800',
     'T': 'bg-purple-100 text-purple-800',
-    'G': 'bg-indigo-100 text-indigo-800'
+    'G': 'bg-indigo-100 text-indigo-800',
+    'E': 'bg-red-100 text-red-800'
   };
 
 

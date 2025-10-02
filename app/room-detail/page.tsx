@@ -34,7 +34,8 @@ function RoomDetailContent() {
   const [checkboxStates, setCheckboxStates] = useState({
     bipum_chk_yn: 'N',
     clear_chk_yn: 'N',
-    insp_chk_yn: 'N'
+    insp_chk_yn: 'N',
+    repair_chk_yn: 'N'
   });
   const { isAuthenticated, loading: authLoading } = useAuth();
 
@@ -67,7 +68,7 @@ function RoomDetailContent() {
   }, [roomNo, isAuthenticated, authLoading]);
 
   // 체크박스 상태 변경 핸들러
-  const handleCheckboxChange = (field: 'bipum_chk_yn' | 'clear_chk_yn' | 'insp_chk_yn') => {
+  const handleCheckboxChange = (field: 'bipum_chk_yn' | 'clear_chk_yn' | 'insp_chk_yn'|'repair_chk_yn') => {
     setCheckboxStates(prev => {
       const newStates = { ...prev };
       
@@ -77,6 +78,7 @@ function RoomDetailContent() {
           newStates.insp_chk_yn = 'Y';
           newStates.clear_chk_yn = 'Y';
           newStates.bipum_chk_yn = 'Y';
+          newStates.repair_chk_yn = 'N';
         } else {
           newStates.insp_chk_yn = 'N';
         }
@@ -85,12 +87,32 @@ function RoomDetailContent() {
         if (prev[field] === 'N') {          
           newStates.clear_chk_yn = 'Y';
           newStates.bipum_chk_yn = 'Y';
+          newStates.repair_chk_yn = 'N';
         } else {
           newStates.bipum_chk_yn = 'N';
+          newStates.repair_chk_yn = 'N';
         }
-      }else {
-        // 다른 체크박스는 토글
-        newStates[field] = prev[field] === 'Y' ? 'N' : 'Y';
+      } else if (field === 'clear_chk_yn') {
+        // 점검완료 체크 시 청소완료와 셋팅완료도 자동 체크
+        if (prev[field] === 'N') {
+          newStates.clear_chk_yn = 'Y';          
+          newStates.repair_chk_yn = 'N';
+        } else {
+          newStates.clear_chk_yn = 'N';
+        }
+      } else if (field === 'repair_chk_yn') {
+        // 점검완료 체크 시 청소완료와 셋팅완료도 자동 체크
+        if (prev[field] === 'N') {
+          newStates.repair_chk_yn = 'Y';
+          newStates.insp_chk_yn = 'N';
+          newStates.clear_chk_yn = 'N';
+          newStates.bipum_chk_yn = 'N';
+        } else {
+          newStates.repair_chk_yn = 'N';
+        }
+      // }else {
+      //   // 다른 체크박스는 토글
+      //   newStates[field] = prev[field] === 'Y' ? 'N' : 'Y';
       }
       
       return newStates;
@@ -113,8 +135,9 @@ function RoomDetailContent() {
         statusCd = 'T'; // 셋팅완료
       } else if (checkboxStates.clear_chk_yn === 'Y') {
         statusCd = 'C'; // 청소완료
+      } else if (checkboxStates.repair_chk_yn === 'Y') {
+        statusCd = 'E'; // 수리중
       }
-      
       // 현재 로그인한 사용자 정보 가져오기
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
@@ -139,6 +162,7 @@ function RoomDetailContent() {
           bipum_chk_yn: checkboxStates.bipum_chk_yn,
           clear_chk_yn: checkboxStates.clear_chk_yn,
           insp_chk_yn: checkboxStates.insp_chk_yn,
+          repair_chk_yn: checkboxStates.repair_chk_yn,
           status_cd: statusCd,
           upd_eeno: user?.email || '',
           upd_date: today
@@ -169,7 +193,7 @@ function RoomDetailContent() {
       
       const { data, error } = await supabase
         .from('kmc_rooms')
-        .select('room_no, use_yn,org_cd, bipum_chk_yn, clear_chk_yn, insp_chk_yn, status_cd')
+        .select('room_no, use_yn,org_cd, bipum_chk_yn, clear_chk_yn, insp_chk_yn, status_cd, repair_chk_yn')
         .eq('room_no', roomNo)
         .single();
       
@@ -188,7 +212,8 @@ function RoomDetailContent() {
       setCheckboxStates({
         bipum_chk_yn: data.bipum_chk_yn || 'N',
         clear_chk_yn: data.clear_chk_yn || 'N',
-        insp_chk_yn: data.insp_chk_yn || 'N'
+        insp_chk_yn: data.insp_chk_yn || 'N',
+        repair_chk_yn: data.repair_chk_yn || 'N'
       });
       
       // 사용자 정보 가져오기
@@ -244,7 +269,8 @@ function RoomDetailContent() {
       'N': '청소중',
       'C': '청소완료',
       'T': '셋팅완료',
-      'G': '점검완료'
+      'G': '점검완료',
+      'E': '수리중'
     };
     return statusMap[statusCd] || statusCd;
   };
@@ -334,37 +360,51 @@ function RoomDetailContent() {
               
               <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">방관리 정보</h2>
+                <div className="flex flex-wrap justify-between items-center gap-6">
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="cleaning"
+                        checked={checkboxStates.clear_chk_yn === 'Y'}
+                        onChange={() => handleCheckboxChange('clear_chk_yn')}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="cleaning" className="text-gray-700 text-lg">청소완료</label>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="setting"
+                        checked={checkboxStates.bipum_chk_yn === 'Y'}
+                        onChange={() => handleCheckboxChange('bipum_chk_yn')}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="setting" className="text-gray-700 text-lg">셋팅완료</label>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="inspection"
+                        checked={checkboxStates.insp_chk_yn === 'Y'}
+                        onChange={() => handleCheckboxChange('insp_chk_yn')}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="inspection" className="text-gray-700 text-lg">점검완료</label>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="repair"
+                      checked={checkboxStates.repair_chk_yn === 'Y'}
+                      onChange={() => handleCheckboxChange('repair_chk_yn')}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="repair" className="text-red-600 text-lg font-bold">수리중</label>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-6">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="cleaning"
-                      checked={checkboxStates.clear_chk_yn === 'Y'}
-                      onChange={() => handleCheckboxChange('clear_chk_yn')}
-                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="cleaning" className="text-gray-700 text-lg">청소완료</label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="setting"
-                      checked={checkboxStates.bipum_chk_yn === 'Y'}
-                      onChange={() => handleCheckboxChange('bipum_chk_yn')}
-                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="setting" className="text-gray-700 text-lg">셋팅완료</label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="inspection"
-                      checked={checkboxStates.insp_chk_yn === 'Y'}
-                      onChange={() => handleCheckboxChange('insp_chk_yn')}
-                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="inspection" className="text-gray-700 text-lg">점검완료</label>
-                  </div>
                 </div>
               </div>
               
