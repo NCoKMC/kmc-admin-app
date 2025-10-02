@@ -178,7 +178,7 @@ export default function MealListPage() {
                 onClick={handleCSVDownload}
                 className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               >
-                CSV 다운로드
+                엑셀 다운로드
               </button>
             )}
           </div>
