@@ -358,16 +358,47 @@ export default function Reservations() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {/* 년월 선택 */}
               <div>
-                <label htmlFor="yearMonth" className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   년월
                 </label>
-                <input
-                  type="month"
-                  id="yearMonth"
-                  value={selectedYearMonth}
-                  onChange={(e) => setSelectedYearMonth(e.target.value)}
-                  className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base sm:text-lg"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={selectedYearMonth.split('-')[0]}
+                    onChange={(e) => {
+                      const year = e.target.value;
+                      const month = selectedYearMonth.split('-')[1];
+                      setSelectedYearMonth(`${year}-${month}`);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => {
+                      const year = new Date().getFullYear() - 2 + i;
+                      return (
+                        <option key={year} value={year}>
+                          {year}년
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <select
+                    value={selectedYearMonth.split('-')[1]}
+                    onChange={(e) => {
+                      const year = selectedYearMonth.split('-')[0];
+                      const month = e.target.value;
+                      setSelectedYearMonth(`${year}-${month}`);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const month = String(i + 1).padStart(2, '0');
+                      return (
+                        <option key={month} value={month}>
+                          {month}월
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
               </div>
 
               {/* 예약 상태 선택 */}
