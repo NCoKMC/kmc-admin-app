@@ -9,7 +9,7 @@ import Router from 'next/router';
 import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
 import { KmcInfo, ReservationStatus, reservationStatusMap, mapExcelReservationStatus } from '../lib/type';
-import { formatDate, toYmdForDB, toHhmmForDB } from '../utils/dateUtils';
+import { formatDate, toYmdForDB, toHhmmForDB, formatHhmmDisplay } from '../utils/dateUtils';
 import { useAuth } from '../lib/auth';
 import * as XLSX from 'xlsx';
 
@@ -495,14 +495,14 @@ export default function Reservations() {
                             {reservation.user_nm}
                           </td>                                              
                           <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">
-                            {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_in_hhmm}
+                            {reservation.check_in_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {formatHhmmDisplay(reservation.check_in_hhmm)}
                           </td>
                           <td className={`px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm w-auto ${
                             isToday(new Date(reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))) 
                               ? 'text-pink-500 font-medium' 
                               : 'text-gray-500'
                           }`}>
-                            {reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {reservation.check_out_hhmm}
+                            {reservation.check_out_ymd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')} {formatHhmmDisplay(reservation.check_out_hhmm)}
                           </td>
                           <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 w-auto">{reservation.location_nm}</td>
                                                                           
@@ -554,8 +554,8 @@ export default function Reservations() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">체크인 시간</label>
                 <input
                   type="time"
-                  value={newReservation.check_in_hhmm.replace(/(\d{2})(\d{2})/, '$1:$2')}
-                  onChange={(e) => setNewReservation({...newReservation, check_in_hhmm: e.target.value.replace(':', '')})}
+                  value={formatHhmmDisplay(newReservation.check_in_hhmm)}
+                  onChange={(e) => setNewReservation({...newReservation, check_in_hhmm: toHhmmForDB(e.target.value)})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
@@ -572,8 +572,8 @@ export default function Reservations() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">체크아웃 시간</label>
                 <input
                   type="time"
-                  value={newReservation.check_out_hhmm.replace(/(\d{2})(\d{2})/, '$1:$2')}
-                  onChange={(e) => setNewReservation({...newReservation, check_out_hhmm: e.target.value.replace(':', '')})}
+                  value={formatHhmmDisplay(newReservation.check_out_hhmm)}
+                  onChange={(e) => setNewReservation({...newReservation, check_out_hhmm: toHhmmForDB(e.target.value)})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>

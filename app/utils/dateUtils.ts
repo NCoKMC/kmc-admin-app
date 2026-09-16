@@ -101,4 +101,20 @@ export const toHhmmForDB = (value: unknown): string => {
     return digits.padStart(4, '0');
   }
   return '';
+};
+
+/** DB HHMM(1000) → 화면 표시(10:00). type="time" value에도 사용 */
+export const formatHhmmDisplay = (value: unknown): string => {
+  if (value == null || value === '') return '';
+  const s = String(value).trim();
+  if (/^\d{1,2}:\d{2}$/.test(s)) {
+    const [h, m] = s.split(':');
+    return `${h.padStart(2, '0')}:${m}`;
+  }
+  const digits = s.replace(/\D/g, '');
+  if (digits.length === 3 || digits.length === 4) {
+    const padded = digits.padStart(4, '0');
+    return `${padded.slice(0, 2)}:${padded.slice(2, 4)}`;
+  }
+  return s;
 }; 

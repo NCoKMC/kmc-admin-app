@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation';
 import { supabase } from '../../lib/supabase';
 import { KmcInfo, ReservationStatus, reservationStatusMap } from '../../lib/type';
-import { formatDateForDB } from '@/app/utils/dateUtils';
+import { formatDateForDB, formatHhmmDisplay, toHhmmForDB } from '@/app/utils/dateUtils';
 import { useAuth } from '../../lib/auth';
 // 타입 정의
 //interface Reservation {
@@ -180,9 +180,9 @@ export default function RoomDetail() {
         .update({
           memo: memo,
           check_in_ymd: editingInfo.check_in_ymd.replace(/-/g, ''),
-          check_in_hhmm: editingInfo.check_in_hhmm,
+          check_in_hhmm: toHhmmForDB(editingInfo.check_in_hhmm),
           check_out_ymd: editingInfo.check_out_ymd.replace(/-/g, ''),
-          check_out_hhmm: editingInfo.check_out_hhmm,
+          check_out_hhmm: toHhmmForDB(editingInfo.check_out_hhmm),
           room_no: editingInfo.room_no,
           guest_num: parseInt(editingInfo.guest_num),
           user_nm: editingInfo.user_nm,
@@ -363,8 +363,8 @@ export default function RoomDetail() {
                         />
                         <input
                           type="time"
-                          value={editingInfo.check_in_hhmm}
-                          onChange={(e) => setEditingInfo(prev => ({ ...prev, check_in_hhmm: e.target.value }))}
+                          value={formatHhmmDisplay(editingInfo.check_in_hhmm)}
+                          onChange={(e) => setEditingInfo(prev => ({ ...prev, check_in_hhmm: toHhmmForDB(e.target.value) }))}
                           className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                         />
                       </div>
@@ -380,8 +380,8 @@ export default function RoomDetail() {
                         />
                         <input
                           type="time"
-                          value={editingInfo.check_out_hhmm}
-                          onChange={(e) => setEditingInfo(prev => ({ ...prev, check_out_hhmm: e.target.value }))}
+                          value={formatHhmmDisplay(editingInfo.check_out_hhmm)}
+                          onChange={(e) => setEditingInfo(prev => ({ ...prev, check_out_hhmm: toHhmmForDB(e.target.value) }))}
                           className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                         />
                       </div>
