@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation';
 import Router from 'next/router';
 import { supabase } from '../lib/supabase';
 import type { JSX } from 'react';
-import { KmcInfo, ReservationStatus, reservationStatusMap } from '../lib/type';
-import { formatDate } from '../utils/dateUtils';
+import { KmcInfo, ReservationStatus, reservationStatusMap, mapExcelReservationStatus } from '../lib/type';
+import { formatDate, toYmdForDB, toHhmmForDB } from '../utils/dateUtils';
 import { useAuth } from '../lib/auth';
 import * as XLSX from 'xlsx';
 
@@ -254,10 +254,14 @@ export default function Reservations() {
       const data = evt.target?.result;
       if (!data) return;
      
-      const workbook = XLSX.read(new Uint8Array(data as ArrayBuffer), { type: 'array' });
+      // cellDates: 엑셀 Date 셀을 Date 객체로 읽음. raw:true 로 시리얼/Date 원본 유지 후 정규화
+      const workbook = XLSX.read(new Uint8Array(data as ArrayBuffer), {
+        type: 'array',
+        cellDates: true,
+      });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, defval: '' });
       const header = json[0] as string[];
       // console.log('엑셀 헤더:', header);
       const orgColumns = [
@@ -275,15 +279,28 @@ export default function Reservations() {
         return;
       }
       
-      // 1. 엑셀 데이터 rows 추출 (orgColumns 인덱스로 읽어서 requiredColumns 컬럼명으로 저장)
-      const rows = json.slice(1).map((row, i) => {
+      // 1. 엑셀 데이터 rows 추출 + 날짜/시간 정규화 (YYYYMMDD / HHMM)
+      const rows = json.slice(1).map((row) => {
         const arr = row as any[];
         const obj: any = {};
         requiredColumns.forEach((col, idx) => {
           obj[col] = arr[idx] ?? null;
         });
+        obj.check_in_ymd = toYmdForDB(obj.check_in_ymd);
+        obj.check_out_ymd = toYmdForDB(obj.check_out_ymd);
+        obj.check_in_hhmm = toHhmmForDB(obj.check_in_hhmm);
+        obj.check_out_hhmm = toHhmmForDB(obj.check_out_hhmm);
+        const status = mapExcelReservationStatus(obj.status_cd);
+        obj.status_cd = status.status_cd;
+        obj.status_nm = status.status_nm;
+        if (obj.guest_num != null && obj.guest_num !== '') {
+          obj.guest_num = String(obj.guest_num).replace(/[^\d]/g, '');
+        }
+        if (obj.seq_no != null && obj.seq_no !== '') {
+          obj.seq_no = String(obj.seq_no).replace(/[^\d]/g, '');
+        }
         return obj;
-      });
+      }).filter((obj) => obj.kmc_cd || obj.user_nm);
 
       const rowCnt = rows.length;
       // console.log('엑셀 데이터 rowCnt:', rowCnt);

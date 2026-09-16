@@ -18,13 +18,50 @@ export interface KmcInfo {
     memo: string;
   };
 
-  export type ReservationStatus = 'I' | 'O' | 'S';
+  export type ReservationStatus = 'I' | 'O' | 'S' | 'C' | 'F';
   // 상태 코드 매핑
   export const reservationStatusMap: Record<ReservationStatus, string> = {
     'I': '입실',
     'O': '퇴실', 
-    'S': '예약'
-  }; 
+    'S': '예약',
+    'C': '예약취소',
+    'F': '만실안내',
+  };
+
+  /** 엑셀 상태(한글/코드) → status_cd, status_nm */
+  export function mapExcelReservationStatus(raw: unknown): { status_cd: ReservationStatus; status_nm: string } {
+    const s = String(raw ?? '').trim();
+    switch (s) {
+      case '예약완료':
+        return { status_cd: 'S', status_nm: '예약완료' };
+      case '접수완료':
+        return { status_cd: 'S', status_nm: '접수완료' };
+      case '예약':
+        return { status_cd: 'S', status_nm: '예약' };
+      case '입실':
+      case 'I':
+      case 'i':
+        return { status_cd: 'I', status_nm: '입실' };
+      case '퇴실':
+      case 'O':
+      case 'o':
+        return { status_cd: 'O', status_nm: '퇴실' };
+      case '예약취소':
+      case 'C':
+      case 'c':
+        return { status_cd: 'C', status_nm: '예약취소' };
+      case '만실안내':
+      case 'F':
+      case 'f':
+        return { status_cd: 'F', status_nm: '만실안내' };
+      case 'S':
+      case 's':
+        return { status_cd: 'S', status_nm: '예약' };
+      default:
+        // 알 수 없는 값은 예약(S)로 두고 원문은 status_nm 에 보존
+        return { status_cd: 'S', status_nm: s || '예약' };
+    }
+  } 
 
 // 방 데이터 타입 정의
 export interface Room {
